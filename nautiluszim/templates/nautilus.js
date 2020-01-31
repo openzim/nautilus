@@ -1,3 +1,4 @@
+/*eslint no-unused-vars: 0*/
 
 /*
   Nautilus JS UI
@@ -13,10 +14,8 @@
     - database.js file containing a DATABASE Array of documents.
 
 */
-
-var Nautilus;
-
-Nautilus = (function() {
+/* exported Nautilus */
+var Nautilus = (function() {
   var defaults;
 
   Nautilus.name = 'Nautilus';
@@ -34,7 +33,6 @@ Nautilus = (function() {
   };
 
   function Nautilus(options) {
-    var _this = this;
     this.options = $.extend({}, defaults, options);
     this.db = new PouchDB(this.options.database_name);
     this.doc_count = 0;
@@ -150,7 +148,7 @@ Nautilus = (function() {
   /*  register handler on modal close to set a placeholder content
       that would appear on next modal's until it loads */
   Nautilus.prototype.init_modal = function () {
-    $('#modal').on('hidden.bs.modal', function (e) {
+    $('#modal').on('hidden.bs.modal', function () {
       $(".modal-body").html("Chargement…");
     });
   };
@@ -192,7 +190,7 @@ Nautilus = (function() {
     this.scroll_scene = new ScrollMagic.Scene(
         {triggerElement: ".scrollable-content #loader", triggerHook: "onEnter"})
       .addTo(this.scroll_ctrl)
-      .on("enter", function (e) {
+      .on("enter", function () {
         if (!$("#loader").hasClass("active")) {
           _this.console.log("REACHED BOTTOM");
           _this.enableInfiniteScroll();
@@ -222,7 +220,6 @@ Nautilus = (function() {
   };
 
   Nautilus.prototype.getItemFor = function (db_doc) {
-    var _this = this;
     let listElement = $("<li />");
 
     let extension;
