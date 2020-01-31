@@ -1,0 +1,39 @@
+# Translations template for PROJECT.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-01-30 12:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.7.0\n"
+
+#: nautilus/scraper.py:325
+msgid "Search"
+msgstr ""
+
+#: nautilus/scraper.py:326
+msgid "Close"
+msgstr ""
+
+#: nautilus/scraper.py:327
+msgid "Loading…"
+msgstr ""
+
+#: nautilus/scraper.py:328
+msgid "No result for this search request."
+msgstr ""
+
+#: nautilus/scraper.py:329
+msgid "Back to Top"
+msgstr ""
+
