@@ -66,11 +66,15 @@ var Nautilus = (function() {
   };
 
   /*** ZIM-RELATED ***/
-  Nautilus.prototype.get_file_path = function (filename) {
+  Nautilus.prototype.get_image_path = function (filepath) {
     if (this.options.in_zim) {
-      return ZIM_IMG_NS + files_prefix + filename;
+      return ZIM_IMG_NS + filepath;
     }
-    return this.options.files_prefix + filename;
+    return filepath;
+  }
+
+  Nautilus.prototype.get_file_path = function (filename) {
+    return this.get_image_path(this.options.files_prefix + filename);
   }
 
   Nautilus.prototype.get_database_path = function () {
@@ -101,9 +105,8 @@ var Nautilus = (function() {
     var script  = document.createElement("script");
     script.setAttribute("src", src);
     script.addEventListener("load", callback);
-    document.getElementsByTagName("body")[0]
-      // using script[1] as zimwriterfs is in <head>
-      .insertBefore(script, document.getElementsByTagName("script")[1]);
+    let body = document.getElementsByTagName("body")[0];
+    body.insertBefore(script, body.getElementsByTagName("script")[0]);
   };
 
   Nautilus.prototype.load_database_from_file = function () {
@@ -238,12 +241,12 @@ var Nautilus = (function() {
         linkTarget = "javascript:nautilus.openAudioPlayer('" + db_doc._id + "', false);";
       } else {
         // a regular file to download
-        linkTarget = this.get_file_path("files/" + fp);
+        linkTarget = this.get_file_path(fp);
         htmlTarget = " target=\"_blank\""
       }
     }
 
-    let icon_src = this.get_file_path("vendors/ext-icons/" + extension + ".svg");
+    let icon_src = this.get_image_path("vendors/ext-icons/" + extension + ".svg");
 
     listElement.html("<span class=\"icon\">" + 
       "<a" + htmlTarget + " href=\"" + linkTarget + "\" class=\"btn btn-neutral\">" +

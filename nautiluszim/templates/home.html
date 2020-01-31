@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta content="utf-8" http-equiv="encoding">
     <title>{{ title }}</title>
     <meta charset="utf-8">
     <meta content="utf-8" http-equiv="encoding">
@@ -77,9 +78,10 @@
     <script type="text/javascript">
         $( document ).ready(function() {
             window.nautilus = new Nautilus({
-                database_name: "{{ db_name }}",
+                database_name: "{{ db_name }}.{{ db_version }}",
                 database_version: "{{ db_version }}",
                 nb_items_per_page: {{ nb_items_per_page }},
+                debug: {{ debug }},
             });
             nautilus.start();
         });

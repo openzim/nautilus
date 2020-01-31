@@ -6,6 +6,7 @@ import re
 import locale
 import gettext
 import colorsys
+import subprocess
 
 import PIL
 import iso639
@@ -24,6 +25,24 @@ def save_file(url, fpath):
         fpath.parent.mkdir(exist_ok=True)
     with open(fpath, "wb") as fp:
         fp.write(req.content)
+
+
+def save_large_file(url, fpath):
+    """ download a binary file from its URL, using wget """
+    subprocess.run(
+        [
+            "wget",
+            "-t",
+            "5",
+            "--retry-connrefused",
+            "--random-wait",
+            "-O",
+            str(fpath),
+            "-c",
+            url,
+        ],
+        check=True,
+    )
 
 
 def get_colors(image_path, use_palette=True):

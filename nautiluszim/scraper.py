@@ -19,6 +19,7 @@ from .zim import ZimInfo, make_zim_file
 from .utils import (
     resize_image,
     save_file,
+    save_large_file,
     get_colors,
     is_hex_color,
     get_language_details,
@@ -161,6 +162,9 @@ class Nautilus(object):
         if not self.skip_download:
             self.download_and_extract_archive()
 
+        if not self.collection:
+            self.collection = self.files_path.joinpath("collection.json")
+
         self.test_collection()
 
         logger.info("update general metadata")
@@ -198,7 +202,10 @@ class Nautilus(object):
 
         for fname in ["nautilus.js", "zimwriterfs.js", "favicon.png"]:
             target = self.build_dir.joinpath(fname)
-            target.unlink(missing_ok=True)
+            try:
+                target.unlink()
+            except FileNotFoundError:
+                pass
             shutil.copy(self.templates_dir.joinpath(fname), target)
         os.makedirs(self.files_path, exist_ok=True)
 
@@ -281,7 +288,7 @@ class Nautilus(object):
         # download if it's a URL
         if self.archive.startswith("http"):
             logger.info(f"Downloading archive at {self.archive}")
-            save_file(self.archive, self.archive_path)
+            save_large_file(self.archive, self.archive_path)
 
         # extract ZIP
         logger.info(f"Extracting ZIP archive {self.archive_path} to {self.files_path}")
@@ -314,6 +321,7 @@ class Nautilus(object):
 
         # build homepage
         html = env.get_template("home.html").render(
+            debug=str(self.debug).lower(),
             title=self.title,
             description=self.description,
             main_color=self.main_color,
