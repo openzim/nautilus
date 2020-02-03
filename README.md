@@ -47,7 +47,8 @@ At the moment, the JSON files needs to provide the following fields for each ite
 # Requirements
 
 * [`zimwriterfs`](https://github.com/openzim/zimwriterfs) for ZIM file packaging. Use `--no-zim` to skip this step.
-* `curl` and `unzip` to install JS dependencies. See `get_js_deps.sh` if you want to do it manually.
+* `wget` and `unzip` to install JS dependencies. See `get_js_deps.sh` if you want to do it manually.
+* `wget` is used to download archive files as well.
 
 # Installation
 
