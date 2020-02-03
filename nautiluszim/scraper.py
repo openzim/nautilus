@@ -330,6 +330,7 @@ class Nautilus(object):
             db_version=int(re.sub(r"([^0-9])", "", self.period)[-4:]),
             nb_items_per_page=self.nb_items_per_page,
             search_label=_("Search"),
+            search_input_label=_("Keywords…"),
             close_label=_("Close"),
             loading_label=_("Loading…"),
             no_result_text=_("No result for this search request."),

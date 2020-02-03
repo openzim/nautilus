@@ -56,7 +56,7 @@ Because the links are generated inside the JS code, we need to know when we're i
 To add a new locale (`fr` in this example, use only ISO-639-1):
 
 1. init for your locale: `pybabel init -d nautiluszim/locale -l fr -i nautiluszim/locale/messages.pot`
-2. make sure the POT is up to date `pybabel extract -o nautiluszim/locale/messages.pot nautilus`
+2. make sure the POT is up to date `pybabel extract -o nautiluszim/locale/messages.pot nautiluszim`
 3. update your locale's catalog `pybabel update -d nautiluszim/locale/ -l fr -i nautiluszim/locale/messages.pot`
 3. translate the PO file ([poedit](https://poedit.net/) is your friend)
 4. compile updated translation `pybabel compile -d nautiluszim/locale -l fr`
