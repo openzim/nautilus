@@ -23,7 +23,7 @@ class LessThanFilter(logging.Filter):
         return 1 if record.levelno < self.max_level else 0
 
 
-logger = logging.getLogger("youtube-scraper")
+logger = logging.getLogger("nautilus-scraper")
 logger.setLevel(logging.NOTSET)
 log_format = "[%(asctime)s] %(levelname)s:%(message)s"
 
