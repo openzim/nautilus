@@ -10,7 +10,7 @@ from zimscraperlib.logging import getLogger
 ROOT_DIR = pathlib.Path(__file__).parent
 NAME = ROOT_DIR.name
 
-with open(ROOT_DIR.joinpath("VERSION"), "f") as fh:
+with open(ROOT_DIR.joinpath("VERSION"), "r") as fh:
     VERSION = fh.read().strip()
 
 

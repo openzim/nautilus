@@ -7,9 +7,9 @@ RUN apt-get update -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget http://download.openzim.org/release/zimwriterfs/zimwriterfs_linux-x86_64-1.3.7.tar.gz
-RUN tar -C /usr/local/bin --strip-components 1 -xf zimwriterfs_linux-x86_64-1.3.7.tar.gz
+RUN tar -C /usr/bin --strip-components 1 -xf zimwriterfs_linux-x86_64-1.3.7.tar.gz
 RUN rm -f zimwriterfs_linux-x86_64-1.3.7.tar.gz
-RUN chmod +x /usr/local/bin/zimwriterfs
+RUN chmod +x /usr/bin/zimwriterfs
 RUN zimwriterfs --version
 
 COPY nautiluszim /src/nautiluszim
