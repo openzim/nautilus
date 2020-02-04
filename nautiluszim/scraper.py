@@ -14,19 +14,14 @@ from pathlib import Path
 from gettext import gettext as _
 
 import jinja2
+from zimscraperlib.logging import nicer_args_join
+from zimscraperlib.zim import ZimInfo, make_zim_file
+from zimscraperlib.fix_ogvjs_dist import fix_source_dir
+from zimscraperlib.download import save_file, save_large_file
+from zimscraperlib.i18n import setlocale, get_language_details
+from zimscraperlib.imaging import resize_image, get_colors, is_hex_color
 
-from .zim import ZimInfo, make_zim_file
-from .utils import (
-    resize_image,
-    save_file,
-    save_large_file,
-    get_colors,
-    is_hex_color,
-    get_language_details,
-    setlocale,
-    nicer_args_join,
-)
-from .constants import logger, ROOT_DIR
+from .constants import logger, ROOT_DIR, SCRAPER
 
 
 class Nautilus(object):
@@ -94,17 +89,18 @@ class Nautilus(object):
             creator=creator,
             publisher=publisher,
             name=name,
+            scraper=SCRAPER,
         )
 
         # set and record locale for translations
         locale_name = locale_name or get_language_details(self.language)["iso-639-1"]
         try:
-            self.locale = setlocale(locale_name)
+            self.locale = setlocale(ROOT_DIR, locale_name)
         except locale.Error:
             logger.error(
                 f"No locale for {locale_name}. Use --locale to specify it. defaulting to en_US"
             )
-            self.locale = setlocale("en")
+            self.locale = setlocale(ROOT_DIR, "en")
 
     @property
     def root_dir(self):
@@ -199,6 +195,8 @@ class Nautilus(object):
             if target.exists():
                 shutil.rmtree(target)
             shutil.copytree(self.templates_dir.joinpath(folder), target)
+
+        fix_source_dir(self.build_dir.joinpath("vendors"), "vendors")
 
         for fname in ["nautilus.js", "zimwriterfs.js", "favicon.png"]:
             target = self.build_dir.joinpath(fname)

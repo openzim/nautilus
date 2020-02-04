@@ -6,17 +6,14 @@ set -e  # fail script on error
 # then launch our ogv.js script to fix dynamic loading links
 ###
 
-function die {
-    echo "$1"
-    exit 1
-}
-
 if ! command -v wget > /dev/null; then
-    die "you need wget."
+    echo "you need wget."
+    exit 1
 fi
 
 if ! command -v unzip > /dev/null; then
-    die "you need unzip."
+    echo "you need unzip."
+    exit 1
 fi
 
 # Absolute path this script is in.
@@ -48,8 +45,12 @@ mv videojs-ogvjs-1.3.1/dist/videojs-ogvjs.js $VENDORS_PATH/videojs-ogvjs.js
 rm -rf videojs-ogvjs-1.3.1
 rm -f v1.3.1.zip
 
-echo "fixing JS files"
-python3 $SCRIPT_PATH/nautiluszim/fix_ogvjs_dist.py
+if command -v fix_ogvjs_dist > /dev/null; then
+    echo "fixing JS files"
+    fix_ogvjs_dist $VENDORS_PATH "vendors"
+else
+    echo "NOT fixing JS files (zimscraperlib not installed)"
+fi
 
 echo "getting jquery.js"
 wget -c -O $VENDORS_PATH/jquery.min.js https://code.jquery.com/jquery-3.4.1.min.js

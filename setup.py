@@ -4,6 +4,7 @@
 
 import pathlib
 import subprocess
+
 from setuptools import setup
 
 from nautiluszim.constants import NAME, VERSION
@@ -19,9 +20,8 @@ with open(ROOT_DIR.joinpath("README.md"), "r") as fp:
     long_description = fp.read()
 
 print("Downloading and fixing JS dependencies...")
-ps = subprocess.run(["/bin/bash", str(ROOT_DIR.joinpath("get_js_deps.sh"))])
+ps = subprocess.run(["/bin/sh", str(ROOT_DIR.joinpath("get_js_deps.sh"))])
 ps.check_returncode()
-
 
 setup(
     name=NAME,
