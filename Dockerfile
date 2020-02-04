@@ -14,7 +14,7 @@ RUN zimwriterfs --version
 
 COPY nautiluszim /src/nautiluszim
 COPY get_js_deps.sh requirements.txt setup.py README.md LICENSE MANIFEST.in /src/
-RUN pip3 install $(grep "zimscraperlib" requirements.txt)
+RUN pip3 install $(grep "zimscraperlib" /src/requirements.txt)
 RUN cd /src/ && python3 ./setup.py install
 
 CMD ["nautiluszim", "--help"]

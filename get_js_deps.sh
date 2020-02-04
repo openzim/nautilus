@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/sh
+
 set -e  # fail script on error
 
 ###

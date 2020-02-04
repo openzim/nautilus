@@ -7,27 +7,22 @@ import subprocess
 
 from setuptools import setup
 
-from nautiluszim.constants import NAME, VERSION
+root_dir = pathlib.Path(__file__).parent
 
-ROOT_DIR = pathlib.Path(__file__).parent
+def read(*names, **kwargs):
+    with open(root_dir.joinpath(*names)) as fh:
+        return fh.read()
 
-with open(ROOT_DIR.joinpath("requirements.txt"), "r") as fp:
-    requirements = [
-        line.strip() for line in fp.readlines() if not line.strip().startswith("#")
-    ]
-
-with open(ROOT_DIR.joinpath("README.md"), "r") as fp:
-    long_description = fp.read()
 
 print("Downloading and fixing JS dependencies...")
-ps = subprocess.run(["/bin/sh", str(ROOT_DIR.joinpath("get_js_deps.sh"))])
+ps = subprocess.run([str(root_dir.joinpath("get_js_deps.sh").resolve())])
 ps.check_returncode()
 
 setup(
-    name=NAME,
-    version=VERSION,
+    name="nautiluszim",
+    version=read("nautiluszim", "VERSION").strip(),
     description="turns a collection of documents into a browsable ZIM file",
-    long_description=long_description,
+    long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="kiwix",
     author_email="reg@kiwix.org",
@@ -35,9 +30,12 @@ setup(
     keywords="kiwix zim offline",
     license="GPLv3+",
     packages=["nautiluszim"],
-    install_requires=requirements,
+    install_requires=[
+        line.strip()
+        for line in read("requirements.txt").splitlines()
+        if not line.strip().startswith("#")
+    ],
     zip_safe=False,
-    platforms="Linux",
     include_package_data=True,
     entry_points={"console_scripts": ["nautiluszim=nautiluszim.__main__:main"]},
     classifiers=[
