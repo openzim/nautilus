@@ -64,9 +64,9 @@ To add a new locale (`fr` in this example, use only ISO-639-1):
 ## releasing
 
 * Update your dependencies: `pip install -U setuptools wheel twine`
-* Make sure changelog.txt is up-to-date
+* Make sure CHANGELOG is up-to-date
 * Bump version on `nautiluszim/VERSION`
 * Build packages `python ./setup.py sdist bdist_wheel`
 * Upload to PyPI `twine upload dist/nautiluszim-1.0.0*`.
-* Commit your Changelog + version bump changes
+* Commit your CHANGELOG + version bump changes
 * Tag version on git `git tag -a v1.0.0`
