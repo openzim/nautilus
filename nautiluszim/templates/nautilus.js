@@ -59,6 +59,7 @@ var Nautilus = (function() {
   }
 
   Nautilus.prototype.start = function() {
+    this.init_videojs();
     this.init_search();
     this.init_modal();
     this.init_backtotop();
@@ -73,14 +74,19 @@ var Nautilus = (function() {
     return filepath;
   }
 
+  Nautilus.prototype.get_meta_path = function (filepath) {
+    if (this.options.in_zim) {
+      return ZIM_META_NS + filepath;
+    }
+    return filepath;
+  }
+
   Nautilus.prototype.get_file_path = function (filename) {
     return this.get_image_path(this.options.files_prefix + filename);
   }
 
   Nautilus.prototype.get_database_path = function () {
-    if (this.options.in_zim)
-      return ZIM_META_NS + this.options.database_path;
-    return this.options.database_path;
+    return this.get_meta_path(this.options.database_path);
   }
 
   /*** DATABASE-RELATED ***/
@@ -133,6 +139,16 @@ var Nautilus = (function() {
     });
   };
 
+  Nautilus.prototype.init_videojs = function () {
+    videojs.options.controls = true;
+    videojs.options.crossorigin = true;
+    videojs.options.preload = "auto";
+    videojs.options.techOrder = ["ogvjs"];
+    videojs.options.ogvjs = {base: "vendors/ogvjs"};
+    // for some reason, global controls options is not working
+    window.videojs_options = {controls: true, preload: 'auto', crossorigin: true};
+  };
+
   Nautilus.prototype.init_database = function () {
     var _this = this;
     this.db.info()
@@ -166,6 +182,7 @@ var Nautilus = (function() {
       db_doc.fp.forEach((fname, index) => {
         body += _this.getAudioCode(fname, multiple ? index + 1 : -1) + "\n";
       });
+      body += "<script>$('.video-js').each(function(){ videojs($(this)[0], videojs_options)});</script>"
       $('#modal .modal-body').html(body);
     });
   }
@@ -216,8 +233,7 @@ var Nautilus = (function() {
     else
       fline = "Morceau " + index + " (" + dl_link + ")";
     return "<p>" + fline +
-      "<audio class=\"video-js vjs-default-skin\" crossorigin " + 
-      "controls preload=\"auto\" data-setup='{\"techOrder\": [\"ogvjs\"], \"ogvjs\": {\"base\": \"/vendors/ogvjs\"}}' " + 
+      "<audio class=\"video-js vjs-default-skin\" " + 
       "style=\"width: 100%; height: 3em;\">" + 
       "<source src=\"" + fpath + "\" type=\"audio/ogg\" /></audio></p>";
   };
