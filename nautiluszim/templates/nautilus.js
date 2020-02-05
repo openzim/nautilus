@@ -209,7 +209,7 @@ var Nautilus = (function() {
 
   Nautilus.prototype.getAudioCode = function (fname, index) {
     let fpath = this.get_file_path(fname);
-    let dl_link = "<a target=\"_blank\" href=\""+ fpath +"\">télécharger</a>";
+    let dl_link = "<a href=\""+ fpath +"\">télécharger</a>";
     let fline;
     if (index == -1)
       fline = "Morceau unique (" + dl_link + ")";
@@ -242,7 +242,6 @@ var Nautilus = (function() {
       } else {
         // a regular file to download
         linkTarget = this.get_file_path(fp);
-        htmlTarget = " target=\"_blank\""
       }
     }
 
