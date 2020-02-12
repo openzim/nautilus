@@ -30,6 +30,8 @@ var Nautilus = (function() {
     index_database_fields: ["ti", "aut"],
     in_zim: IS_IN_ZIM,
     files_prefix: 'files/',
+    show_description: true,
+    show_author: true,
   };
 
   function Nautilus(options) {
@@ -269,12 +271,19 @@ var Nautilus = (function() {
 
     let icon_src = this.get_image_path("vendors/ext-icons/" + extension + ".svg");
 
-    listElement.html("<span class=\"icon\">" + 
+    let elementHTML = "<span class=\"icon\">" + 
       "<a" + htmlTarget + " href=\"" + linkTarget + "\" class=\"btn btn-neutral\">" +
       "<img src=\"" + icon_src + "\" /></a></span>" +
-      "<div class=\"info\"><h2 class=\"title\">" + db_doc.ti + "</h2>" +
-      "<p class=\"small\">" + db_doc.aut + "</p>" +
-      "<p class=\"desc\">" + db_doc.dsc + "</p></div>");
+      "<div class=\"info\"><h2 class=\"title\">" + db_doc.ti + "</h2>";
+
+    if (this.options.show_author)
+      elementHTML += "<p class=\"small\">" + db_doc.aut + "</p>";
+
+    if (this.options.show_description)
+      elementHTML += "<p class=\"desc\">" + db_doc.dsc + "</p>";
+
+    elementHTML += "</div>";
+    listElement.html(elementHTML);
     return listElement;
   }
 

@@ -39,6 +39,14 @@ def main():
     )
 
     parser.add_argument(
+        "--show-description",
+        help="Show description in main list",
+        action="store_true",
+        default=False,
+        dest="show_description",
+    )
+
+    parser.add_argument(
         "--output",
         help="Output folder for ZIM file or build folder",
         default="/output",

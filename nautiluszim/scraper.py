@@ -30,6 +30,7 @@ class Nautilus(object):
         archive,
         collection,
         nb_items_per_page,
+        show_description,
         output_dir,
         no_zim,
         fname,
@@ -54,6 +55,8 @@ class Nautilus(object):
         self.archive = archive
         self.collection = handle_user_provided_file(source=collection, nocopy=True)
         self.nb_items_per_page = nb_items_per_page
+        self.show_author = True
+        self.show_description = show_description
         self.fname = fname
         self.language = language
         self.tags = [t.strip() for t in tags.split(",")]
@@ -326,6 +329,8 @@ class Nautilus(object):
             db_name=f"{self.name}_db",
             db_version=int(re.sub(r"([^0-9])", "", self.period)[-4:]),
             nb_items_per_page=self.nb_items_per_page,
+            show_author=self.show_author,
+            show_description=self.show_description,
             search_label=_("Search"),
             search_input_label=_("Keywords…"),
             close_label=_("Close"),
