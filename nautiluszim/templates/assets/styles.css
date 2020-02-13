@@ -206,3 +206,10 @@ p.small {
         padding-left: 0;
     }
 }
+
+/* bootstrap for smaller screen fix */
+@media (max-width: 375px) {
+    .modal {
+        width: calc(100% - .7rem);
+    }
+}

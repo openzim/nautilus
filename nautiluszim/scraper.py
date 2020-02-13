@@ -7,7 +7,6 @@ import re
 import json
 import locale
 import shutil
-import pathlib
 import datetime
 import subprocess
 from pathlib import Path
@@ -15,11 +14,12 @@ from gettext import gettext as _
 
 import jinja2
 from zimscraperlib.logging import nicer_args_join
+from zimscraperlib.download import save_large_file
 from zimscraperlib.zim import ZimInfo, make_zim_file
 from zimscraperlib.fix_ogvjs_dist import fix_source_dir
-from zimscraperlib.download import save_file, save_large_file
+from zimscraperlib.inputs import handle_user_provided_file
 from zimscraperlib.i18n import setlocale, get_language_details
-from zimscraperlib.imaging import resize_image, get_colors, is_hex_color
+from zimscraperlib.imaging import resize_image, get_colors, is_hex_color, create_favicon
 
 from .constants import logger, ROOT_DIR, SCRAPER
 
@@ -30,6 +30,7 @@ class Nautilus(object):
         archive,
         collection,
         nb_items_per_page,
+        show_description,
         output_dir,
         no_zim,
         fname,
@@ -52,8 +53,10 @@ class Nautilus(object):
     ):
         # options & zim params
         self.archive = archive
-        self.collection = collection
+        self.collection = handle_user_provided_file(source=collection, nocopy=True)
         self.nb_items_per_page = nb_items_per_page
+        self.show_author = True
+        self.show_description = show_description
         self.fname = fname
         self.language = language
         self.tags = [t.strip() for t in tags.split(",")]
@@ -238,14 +241,7 @@ class Nautilus(object):
 
         for src, dest, width, height in images:
             if src:
-                if src.startswith("http"):
-                    logger.debug(f"download {src} -> {dest}")
-                    save_file(src, dest)
-                else:
-                    if not pathlib.Path(src).exists():
-                        raise IOError(f"{src} could not be found.")
-                    logger.debug(f"copy {src} -> {dest}")
-                    shutil.copy(src, dest)
+                handle_user_provided_file(source=src, dest=dest)
                 resize_image(dest, width=width, height=height, method="thumbnail")
 
         if self.main_color and not is_hex_color(self.main_color):
@@ -265,6 +261,12 @@ class Nautilus(object):
         self.publisher = self.publisher or "Kiwix"
 
         self.tags = self.tags or []
+
+        # generate ICO favicon (fallback for browsers)
+        create_favicon(
+            self.build_dir.joinpath("favicon.png"),
+            self.build_dir.joinpath("favicon.ico"),
+        )
 
         self.zim_info.update(
             title=self.title,
@@ -327,6 +329,8 @@ class Nautilus(object):
             db_name=f"{self.name}_db",
             db_version=int(re.sub(r"([^0-9])", "", self.period)[-4:]),
             nb_items_per_page=self.nb_items_per_page,
+            show_author=self.show_author,
+            show_description=self.show_description,
             search_label=_("Search"),
             search_input_label=_("Keywords…"),
             close_label=_("Close"),

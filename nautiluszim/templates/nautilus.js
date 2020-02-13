@@ -30,6 +30,8 @@ var Nautilus = (function() {
     index_database_fields: ["ti", "aut"],
     in_zim: IS_IN_ZIM,
     files_prefix: 'files/',
+    show_description: true,
+    show_author: true,
   };
 
   function Nautilus(options) {
@@ -37,6 +39,7 @@ var Nautilus = (function() {
     this.db = new PouchDB(this.options.database_name);
     this.doc_count = 0;
     this.list_e = $("#doc-list");
+    this.ident = window.location.hash.substring(1);
 
     this.console = this.options.debug ? console : {
       log() {},
@@ -54,8 +57,6 @@ var Nautilus = (function() {
     // scroll related
     this.scroll_ctrl = new ScrollMagic.Controller();
     this.scroll_scene = null;
-
-    Sugar.String.extend();
   }
 
   Nautilus.prototype.start = function() {
@@ -93,7 +94,10 @@ var Nautilus = (function() {
   Nautilus.prototype.on_database_ready = function(db_info) {
     this.doc_count = db_info.doc_count;
     this.console.debug("database ready", this.doc_count, "documents");
-    this.getRows();
+    if (this.ident)
+      this.restoreState(this.ident);
+    else
+      this.getRows();
   };
 
   Nautilus.prototype.index_database = function (db_info) {
@@ -143,7 +147,7 @@ var Nautilus = (function() {
     videojs.options.controls = true;
     videojs.options.crossorigin = true;
     videojs.options.preload = "auto";
-    videojs.options.techOrder = ["ogvjs"];
+    videojs.options.techOrder = ["html5", "ogvjs"];
     videojs.options.ogvjs = {base: "vendors/ogvjs"};
     // for some reason, global controls options is not working
     window.videojs_options = {controls: true, preload: 'auto', crossorigin: true};
@@ -172,13 +176,17 @@ var Nautilus = (function() {
     });
   };
 
-  Nautilus.prototype.openAudioPlayer = function(db_id, multiple) {
+  Nautilus.prototype.openAudioPlayer = function(db_id) {
     var _this = this;
     $("#modal h5").text("…");
     $('#modal').modal({backdrop: 'static'});
     this.db.get(db_id).then((db_doc) => {
+      // update link
+      _this.updateIdent({modalAudioId: db_id});
+
       $("#modal h5").text(db_doc.ti);
       let body = "";
+      let multiple = db_doc.fp.length > 1;
       db_doc.fp.forEach((fname, index) => {
         body += _this.getAudioCode(fname, multiple ? index + 1 : -1) + "\n";
       });
@@ -212,7 +220,7 @@ var Nautilus = (function() {
       .addTo(this.scroll_ctrl)
       .on("enter", function () {
         if (!$("#loader").hasClass("active")) {
-          _this.console.log("REACHED BOTTOM");
+          // reached bottom
           _this.enableInfiniteScroll();
           _this.getRows();
         }
@@ -247,14 +255,14 @@ var Nautilus = (function() {
     // what kind of link is that?
     if (db_doc.fp.length > 1) {
       // a multiple audio link
-      linkTarget = "javascript:nautilus.openAudioPlayer('" + db_doc._id + "', true);";
+      linkTarget = "javascript:nautilus.openAudioPlayer('" + db_doc._id + "');";
       extension = "ogg";
     } else {
       let fp = db_doc.fp[0];
-      extension = fp.reverse().split(".")[0].reverse();
+      extension = Sugar.String.reverse(Sugar.String.reverse(fp).split(".")[0]);
       if (extension == "ogg") {
         //  a single audio file
-        linkTarget = "javascript:nautilus.openAudioPlayer('" + db_doc._id + "', false);";
+        linkTarget = "javascript:nautilus.openAudioPlayer('" + db_doc._id + "');";
       } else {
         // a regular file to download
         linkTarget = this.get_file_path(fp);
@@ -263,12 +271,19 @@ var Nautilus = (function() {
 
     let icon_src = this.get_image_path("vendors/ext-icons/" + extension + ".svg");
 
-    listElement.html("<span class=\"icon\">" + 
+    let elementHTML = "<span class=\"icon\">" + 
       "<a" + htmlTarget + " href=\"" + linkTarget + "\" class=\"btn btn-neutral\">" +
       "<img src=\"" + icon_src + "\" /></a></span>" +
-      "<div class=\"info\"><h2 class=\"title\">" + db_doc.ti + "</h2>" +
-      "<p class=\"small\">" + db_doc.aut + "</p>" +
-      "<p class=\"desc\">" + db_doc.dsc + "</p></div>");
+      "<div class=\"info\"><h2 class=\"title\">" + db_doc.ti + "</h2>";
+
+    if (this.options.show_author)
+      elementHTML += "<p class=\"small\">" + db_doc.aut + "</p>";
+
+    if (this.options.show_description)
+      elementHTML += "<p class=\"desc\">" + db_doc.dsc + "</p>";
+
+    elementHTML += "</div>";
+    listElement.html(elementHTML);
     return listElement;
   }
 
@@ -294,25 +309,114 @@ var Nautilus = (function() {
       $("#loader").addClass("active");
     else
       $("#loader").removeClass("active");
-  }
+  };
 
   Nautilus.prototype.on_no_search_result = function() {
     this.console.debug("no search result");
     this.disableInfiniteScroll();
     $("#loader").hide();
     $(".no-result").show();
-  }
+  };
 
   Nautilus.prototype.on_no_more_search_result = function() {
     this.console.debug("no more search result");
     this.disableInfiniteScroll();
     $("#loader").hide();
-  }
+  };
 
   Nautilus.prototype.on_rows_updated = function () {
     this.update_sroll_scene(); // make sure the scene gets the new start position
     this.disableInfiniteScroll();
+  };
+
+  Nautilus.prototype.updateIdent = function(update) {
+    // update current ident with supplied info and refresh URI
+    let pident = this.parsedIdent();
+    pident = Sugar.Object.merge(pident, update);
+
+    // serialize ident
+    if (pident.kind == "random") {
+      options = pident.documentIds.join(".");
+    }
+    if (pident.kind == "search") {
+      options = pident.cursor.toString() + "_" + pident.text.trim();
+    }
+    this.ident = pident.kind + "-" + pident.modalAudioId + "-" + options;
+    window.location.hash = this.ident;
   }
+
+  Nautilus.prototype.resetIdent = function(update) {
+    // sets the ident using the provided info
+    this.ident = "";
+    this.updateIdent(update);
+  }
+
+  Nautilus.prototype.parsedIdent = function(ident) {
+    // format::  {kind}-{modalAudioId}-{options}
+    // rando::   random-{modalAudioId}-{id}.{id}.{id}
+    // search::  search-{modalAudioId}-{cursor}_{text}
+
+    if (ident === undefined)
+      ident = this.ident;
+
+    let kind = modalAudioId = options = documentIds = cursor = text = "";
+
+    let parts = ident.split("-", 3);
+    if (parts.length == 3)
+      options = parts.pop();
+    if (parts.length == 2)
+      modalAudioId = parts.pop();
+    kind = parts.pop();
+
+    if (kind == "random") {
+      documentIds = options.trim().split(".")
+        .map(function (sid) { return parseInt(sid); })
+        .filter(function (id) { return !isNaN(id)})
+        .map(function (id) { return id.toString();});
+    }
+
+    if (kind == "search") {
+      let opt_parts = options.split("_", 2);
+      cursor = 0;
+      text = opt_parts.pop().trim();
+      if (opt_parts.length)
+        cursor = parseInt(opt_parts.pop().trim()) || 0;
+    }
+
+    return {
+      'kind': kind,
+      'modalAudioId': modalAudioId,
+      'options': options,
+      'documentIds': documentIds,
+      'cursor': cursor,
+      'text': text,
+    }
+
+  };
+
+  Nautilus.prototype.restoreState = function(ident) {
+    this.console.debug("restoring state", ident);
+    let pident = this.parsedIdent(ident);
+
+    if (pident.kind == "random") {
+      if (pident.documentIds.length) {
+        this.getRequestedDocuments("random", pident.documentIds, this.displayRows);
+      }
+    }
+    else if (pident.kind == "search") {
+        $("#search_text").val(pident.text);
+        this.search(pident.text, pident.cursor);
+    } else {
+      this.console.debug("invalid ident!");
+      this.resetIdent({});
+      this.getRows();
+    }
+
+    if (pident.modalAudioId) {
+      this.console.debug("restoring modal", pident.modalAudioId);
+      this.openAudioPlayer(pident.modalAudioId);
+    }
+  };
 
   Nautilus.prototype.getRows = function () {
     if (this.in_search) {
@@ -320,20 +424,12 @@ var Nautilus = (function() {
     } else {
       this.getRandomDocuments(this.displayRows);
     }
-  }
+  };
 
-  Nautilus.prototype.getRandomDocuments = function (on_complete) {
+  Nautilus.prototype.getRequestedDocuments = function (ident_prefix, doc_ids, on_complete) {
     var _this = this;
-    function getRandomInt(max) {
-      return Math.floor(Math.random() * max);
-    }
-
-    _this.console.log("displayRandomDocuments", this.doc_count, this.options.nb_items_per_page);
-    let seq_ids = [];
-    for (var i=0; i<this.options.nb_items_per_page;i++) {
-      seq_ids.push(getRandomInt(this.doc_count).toString());
-    }
-    this.db.allDocs({keys: seq_ids, include_docs: true})
+    this.resetIdent({kind: "random", documentIds: doc_ids});
+    this.db.allDocs({keys: doc_ids, include_docs: true})
       .then((results) => {
         let rows = [];
         results.rows.forEach(function (row) {
@@ -349,8 +445,22 @@ var Nautilus = (function() {
         }
         
       }).catch(function (err) {
-        _this.console.error("Error in getting documents", seq_ids, err);
+        _this.console.error("Error in getting documents", doc_ids, err);
       });
+  };
+
+  Nautilus.prototype.getRandomDocuments = function (on_complete) {
+    var _this = this;
+    function getRandomInt(max) {
+      return Math.floor(Math.random() * max);
+    }
+
+    _this.console.log("displayRandomDocuments", this.doc_count, this.options.nb_items_per_page);
+    let seq_ids = [];
+    for (var i=0; i<this.options.nb_items_per_page;i++) {
+      seq_ids.push(getRandomInt(this.doc_count).toString());
+    }
+    this.getRequestedDocuments("random", seq_ids, on_complete);
   };
 
   Nautilus.prototype.getSearchResults = function (text, on_complete) {
@@ -367,7 +477,9 @@ var Nautilus = (function() {
                     fields: ['ti', 'dsc', 'aut', 'fp', '_id'],
                     skip: skip,
                     limit: _this.options.nb_items_per_page};
-    this.console.debug(findOpts);
+
+    this.resetIdent({kind: "search", cursor: skip, text: text.trim()});
+
     this.db.find(findOpts).then(function (result) {
       if (!result || !result.docs || !result.docs.length) {
         _this.on_no_search_result();
@@ -390,11 +502,11 @@ var Nautilus = (function() {
     });
   };
 
-  Nautilus.prototype.search = function (text) {
+  Nautilus.prototype.search = function (text, cursor) {
     this.disableInfiniteScroll();
     $(".no-result").hide();
     $("#loader").show();
-    this.search_cursor = 0;
+    this.search_cursor = cursor || 0;
     this.search_text = text;
     this.in_search = true;
     this.resetList();
