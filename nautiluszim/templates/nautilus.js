@@ -147,7 +147,7 @@ var Nautilus = (function() {
     videojs.options.controls = true;
     videojs.options.crossorigin = true;
     videojs.options.preload = "auto";
-    videojs.options.techOrder = ["ogvjs"];
+    videojs.options.techOrder = ["html5", "ogvjs"];
     videojs.options.ogvjs = {base: "vendors/ogvjs"};
     // for some reason, global controls options is not working
     window.videojs_options = {controls: true, preload: 'auto', crossorigin: true};
