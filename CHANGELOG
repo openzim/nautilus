@@ -1,2 +1,12 @@
+Version 1.0.1
+    using zimscraperlib 1.0.2
+    using handle_user_provided_file from lib
+    changed charset position to overcome libkiwix issue
+    fixed link on logo (was /)
+    enabled history-friendly, shareable navigation
+    not displaying description by default, added --show-description
+    using native decoding for <audio/> if supported
+    fixed popup margin on smaller screens
+
 Version 1.0.0
     initial version
