@@ -21,7 +21,7 @@ You now have an isolated python installation in the `./nautilus-env/` folder, co
 __Note__: you must activate the `virtualenv` before running the scraper so it uses this virtual python installation
 
 ``` bash
-source youtube-venv/bin/activate
+source nautilus-env/bin/activate
 ```
 
 and then run it:
