@@ -16,8 +16,23 @@ def read(*names, **kwargs):
 
 
 print("Downloading and fixing JS dependencies...")
-ps = subprocess.run([str(root_dir.joinpath("get_js_deps.sh").resolve())])
-ps.check_returncode()
+subprocess.run([str(root_dir.joinpath("get_js_deps.sh").resolve())], check=True)
+
+print("Compile handlebars templates")
+subprocess.run(
+    [
+        "handlebars",
+        str(root_dir / "nautiluszim" / "templates"),
+        "-f",
+        str(
+            root_dir.joinpath(
+                "nautiluszim", "templates", "assets", "templates", "precompiled.js"
+            )
+        ),
+    ],
+    check=True,
+)
+
 
 setup(
     name="nautiluszim",
