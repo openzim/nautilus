@@ -14,15 +14,16 @@ with open(ROOT_DIR.joinpath("VERSION"), "r") as fh:
     VERSION = fh.read().strip()
 
 SCRAPER = f"{NAME} {VERSION}"
-DEBUG = False
+
+class Global:
+    debug = False
 
 
 def setDebug(debug):
     """ toggle constants global DEBUG flag (used by getLogger) """
-    global DEBUG
-    DEBUG = bool(debug)
+    Global.debug = bool(debug)
 
 
 def getLogger():
     """ configured logger respecting DEBUG flag """
-    return lib_getLogger(NAME, level=logging.DEBUG if DEBUG else logging.INFO)
+    return lib_getLogger(NAME, level=logging.DEBUG if Global.debug else logging.INFO)
