@@ -183,6 +183,9 @@ var Nautilus = (function() {
     }
     $('#modal').on('hidden.bs.modal', erase_modal_content);
     erase_modal_content();
+
+    // register about button
+    $('.about-btn').on('click', function () {_this.openAboutModal();});
   };
 
   Nautilus.prototype.openMediaPlayer = function(db_id) {
@@ -211,6 +214,14 @@ var Nautilus = (function() {
       $('#modal .modal-body').html(body_tmpl({doc: doc, i18n: _this.options.i18n}));
     });
   }
+
+  Nautilus.prototype.openAboutModal = function() {
+    let _this = this;
+    $('#modal').modal({backdrop: 'static'});
+    let title_tmpl = Handlebars.templates.modal_title;
+    $('#modal .modal-title').html(title_tmpl({title: _this.options.title}));
+    $('#modal .modal-body').html($("#about-content").html());
+  };
 
   /*  enable search trigger */
   Nautilus.prototype.init_search = function () {

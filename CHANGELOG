@@ -5,7 +5,8 @@ Version 1.0.2
     Added support for multi-format items #11
     Fixed i18n #13
     Added support for videos (and more audio formats) #2
-    updated zimwriterfs to 1.3.9
+    Updated zimwriterfs to 1.3.9
+    Added support for custom about page
 
 Version 1.0.1
     using zimscraperlib 1.0.2

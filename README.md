@@ -44,6 +44,16 @@ At the moment, the JSON files needs to provide the following fields for each ite
 ]
 ```
 
+## About page
+
+Either inside the archive ZIP as `/about.html` or elsewhere, specified via `--about myabout.html`,
+you may supply an about page in HTML format. It will be displayed in a modal popup and will include
+at its bottom your *secondary-logo* if provided.
+
+* Use only content tags (no `<html />` nor `<head />` nor `<script />` etc)
+* Use inline styling if required but no styling is recommended.
+* Include one logo inline if required.
+
 # Requirements
 
 * [`zimwriterfs`](https://github.com/openzim/zimwriterfs) for ZIM file packaging. Use `--no-zim` to skip this step.
