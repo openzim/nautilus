@@ -327,7 +327,7 @@ var Nautilus = (function() {
   Nautilus.prototype.displayRows = function (rows) {
     var _this = this;
     let template = Handlebars.templates.display_rows;
-    _this.list_e.html(template({rows: rows, i18n: _this.options.i18n}));
+    _this.list_e.html(_this.list_e.html() + template({rows: rows, i18n: _this.options.i18n}));
     _this.on_rows_updated();
   };
 
