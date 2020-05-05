@@ -76,6 +76,10 @@ footer {
     box-sizing: content-box;
 }
 
+.modal-body img.icon {
+    width: 2rem;
+}
+
 /* event-list ; default to small screen */
 .event-list {
     list-style: none;
