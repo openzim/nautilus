@@ -1,0 +1,14 @@
+{{#each rows}}
+  <li>
+      <span class="icon">
+        <a href="{{target}}" class="btn btn-neutral">
+          <img src="{{icon}}" />
+        </a>
+      </span>
+      <div class="info">
+        <h2 class="title">{{title}}</h2>{{#if author}}
+        <p class="small">{{ author }}</p>{{/if}}{{#if description}}
+        <p class="desc">{{description}}</p>{{/if}}
+      </div>
+  </li>
+{{/each}}

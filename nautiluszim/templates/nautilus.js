@@ -32,6 +32,9 @@ var Nautilus = (function() {
     files_prefix: 'files/',
     show_description: true,
     show_author: true,
+    audio_extensions: ["ogg", "mp3", "aif", "mpa", "wav", "wma"],
+    video_extensions: ["webm", "ogv", "mp4", "mpg", "mpeg", "avi", "mkv", "mov", "wmv", "m4v", "h264", "3gp"],
+    i18n: {loading: "Loading…"},
   };
 
   function Nautilus(options) {
@@ -171,27 +174,41 @@ var Nautilus = (function() {
   /*  register handler on modal close to set a placeholder content
       that would appear on next modal's until it loads */
   Nautilus.prototype.init_modal = function () {
-    $('#modal').on('hidden.bs.modal', function () {
-      $(".modal-body").html("Chargement…");
-    });
+    let _this = this;
+    function erase_modal_content() {
+      let title_tmpl = Handlebars.templates.modal_title;
+      let body_tmpl = Handlebars.templates.modal_empty_body;
+      $('#modal .modal-title').html(title_tmpl({title: _this.options.i18n.loading}));
+      $('#modal .modal-body').html(body_tmpl({i18n: _this.options.i18n}));
+    }
+    $('#modal').on('hidden.bs.modal', erase_modal_content);
+    erase_modal_content();
   };
 
-  Nautilus.prototype.openAudioPlayer = function(db_id) {
+  Nautilus.prototype.openMediaPlayer = function(db_id) {
     var _this = this;
-    $("#modal h5").text("…");
     $('#modal').modal({backdrop: 'static'});
     this.db.get(db_id).then((db_doc) => {
       // update link
-      _this.updateIdent({modalAudioId: db_id});
+      _this.updateIdent({modalId: db_id});
 
-      $("#modal h5").text(db_doc.ti);
-      let body = "";
-      let multiple = db_doc.fp.length > 1;
+      let doc = {
+        title: db_doc.ti,
+        author: db_doc.aut,
+        description: db_doc.desc,
+        multiple: db_doc.fp.length > 1,
+        items: [],
+      };
       db_doc.fp.forEach((fname, index) => {
-        body += _this.getAudioCode(fname, multiple ? index + 1 : -1) + "\n";
+        let details = this.getDetailsFor(fname);
+        details.index = doc.multiple ? index + 1 : -1;
+        doc.items.push(details);
       });
-      body += "<script>$('.video-js').each(function(){ videojs($(this)[0], videojs_options)});</script>"
-      $('#modal .modal-body').html(body);
+
+      let title_tmpl = Handlebars.templates.modal_title;
+      let body_tmpl = Handlebars.templates.media_player;
+      $('#modal .modal-title').html(title_tmpl({title: doc.title}));
+      $('#modal .modal-body').html(body_tmpl({doc: doc, i18n: _this.options.i18n}));
     });
   }
 
@@ -232,66 +249,74 @@ var Nautilus = (function() {
     this.list_e.html("");
   };
 
-  Nautilus.prototype.getAudioCode = function (fname, index) {
+  Nautilus.prototype.getExtensionFor = function (fname) {
+   return Sugar.String.reverse(Sugar.String.reverse(fname).split(".")[0]); 
+  };
+
+  Nautilus.prototype.getIconFor = function (extension) {
+    return this.get_image_path("vendors/ext-icons/" + extension + ".svg");
+  };
+
+  Nautilus.prototype.getDetailsFor = function (fname) {
     let fpath = this.get_file_path(fname);
-    let dl_link = "<a href=\""+ fpath +"\">télécharger</a>";
-    let fline;
-    if (index == -1)
-      fline = "Morceau unique (" + dl_link + ")";
-    else
-      fline = "Morceau " + index + " (" + dl_link + ")";
-    return "<p>" + fline +
-      "<audio class=\"video-js vjs-default-skin\" " + 
-      "style=\"width: 100%; height: 3em;\">" + 
-      "<source src=\"" + fpath + "\" type=\"audio/ogg\" /></audio></p>";
+    let extension = this.getExtensionFor(fname);
+    let is_audio = this.options.audio_extensions.indexOf(extension) != -1;
+    let is_video = this.options.video_extensions.indexOf(extension) != -1;
+    let is_file = !is_audio && !is_video;
+    let icon = this.get_image_path("vendors/ext-icons/" + extension + ".svg");
+    let mime = extension;
+    let kind = "document";
+    if (is_audio) {
+      kind = "audio";
+      mime = "audio/" + extension;
+    }
+    if (is_video) {
+      kind = "video";
+      mime = "video/" + extension;
+    }
+    return {
+      fname: fname,
+      fpath: fpath,
+      extension: extension,
+      is_audio: is_audio,
+      is_video: is_video,
+      is_file: is_file,
+      icon: icon,
+      mime: mime,
+      kind: kind,
+    };
   };
 
   Nautilus.prototype.getItemFor = function (db_doc) {
-    let listElement = $("<li />");
-
-    let extension;
-    let linkTarget = "";
-    let htmlTarget = "";
-    // what kind of link is that?
-    if (db_doc.fp.length > 1) {
-      // a multiple audio link
-      linkTarget = "javascript:nautilus.openAudioPlayer('" + db_doc._id + "');";
-      extension = "ogg";
-    } else {
-      let fp = db_doc.fp[0];
-      extension = Sugar.String.reverse(Sugar.String.reverse(fp).split(".")[0]);
-      if (extension == "ogg") {
-        //  a single audio file
-        linkTarget = "javascript:nautilus.openAudioPlayer('" + db_doc._id + "');";
-      } else {
-        // a regular file to download
-        linkTarget = this.get_file_path(fp);
-      }
+    let multiple = db_doc.fp.length > 1;
+    let extension = "folder";
+    let fp = "folder";
+    let target = 1;
+    if (!multiple) {
+      fp = db_doc.fp[0];
+      extension = this.getExtensionFor(fp);
+      target = this.get_file_path(fp);
     }
 
-    let icon_src = this.get_image_path("vendors/ext-icons/" + extension + ".svg");
+    let details = this.getDetailsFor(fp);
+    if (details.is_audio || details.is_video || multiple)
+      target = "javascript:nautilus.openMediaPlayer('" + db_doc._id + "');";
 
-    let elementHTML = "<span class=\"icon\">" + 
-      "<a" + htmlTarget + " href=\"" + linkTarget + "\" class=\"btn btn-neutral\">" +
-      "<img src=\"" + icon_src + "\" /></a></span>" +
-      "<div class=\"info\"><h2 class=\"title\">" + db_doc.ti + "</h2>";
+    let row = {
+      title: db_doc.ti,
+      author: this.options.show_author ? db_doc.aut : null,
+      description: this.options.show_description ? db_doc.dsc : null,
+      target: target,
+      multiple: multiple,
+    };
 
-    if (this.options.show_author)
-      elementHTML += "<p class=\"small\">" + db_doc.aut + "</p>";
-
-    if (this.options.show_description)
-      elementHTML += "<p class=\"desc\">" + db_doc.dsc + "</p>";
-
-    elementHTML += "</div>";
-    listElement.html(elementHTML);
-    return listElement;
+    return $.extend({}, row, details);
   }
 
   Nautilus.prototype.displayRows = function (rows) {
     var _this = this;
-    rows.forEach((row) => {
-      _this.list_e.append(row);
-    });
+    let template = Handlebars.templates.display_rows;
+    _this.list_e.html(template({rows: rows, i18n: _this.options.i18n}));
     _this.on_rows_updated();
   };
 
@@ -341,7 +366,7 @@ var Nautilus = (function() {
     if (pident.kind == "search") {
       options = pident.cursor.toString() + "_" + pident.text.trim();
     }
-    this.ident = pident.kind + "-" + pident.modalAudioId + "-" + options;
+    this.ident = pident.kind + "-" + pident.modalId + "-" + options;
     window.location.hash = this.ident;
   }
 
@@ -352,20 +377,20 @@ var Nautilus = (function() {
   }
 
   Nautilus.prototype.parsedIdent = function(ident) {
-    // format::  {kind}-{modalAudioId}-{options}
-    // rando::   random-{modalAudioId}-{id}.{id}.{id}
-    // search::  search-{modalAudioId}-{cursor}_{text}
+    // format::  {kind}-{modalId}-{options}
+    // rando::   random-{modalId}-{id}.{id}.{id}
+    // search::  search-{modalId}-{cursor}_{text}
 
     if (ident === undefined)
       ident = this.ident;
 
-    let kind = modalAudioId = options = documentIds = cursor = text = "";
+    let kind = modalId = options = documentIds = cursor = text = "";
 
     let parts = ident.split("-", 3);
     if (parts.length == 3)
       options = parts.pop();
     if (parts.length == 2)
-      modalAudioId = parts.pop();
+      modalId = parts.pop();
     kind = parts.pop();
 
     if (kind == "random") {
@@ -385,7 +410,7 @@ var Nautilus = (function() {
 
     return {
       'kind': kind,
-      'modalAudioId': modalAudioId,
+      'modalId': modalId,
       'options': options,
       'documentIds': documentIds,
       'cursor': cursor,
@@ -412,9 +437,9 @@ var Nautilus = (function() {
       this.getRows();
     }
 
-    if (pident.modalAudioId) {
-      this.console.debug("restoring modal", pident.modalAudioId);
-      this.openAudioPlayer(pident.modalAudioId);
+    if (pident.modalId) {
+      this.console.debug("restoring modal", pident.modalId);
+      this.openMediaPlayer(pident.modalId);
     }
   };
 

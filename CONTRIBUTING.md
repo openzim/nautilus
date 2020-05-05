@@ -32,11 +32,21 @@ python nautiluszim --help
 nautilus-env/bin/python nautiluszim --help
 ```
 
+_Note_: when using raw source, you need to compile JS templates first (see bellow).
+
 ## contributions
 
 * Open issues, bug reports and send PRs [on github](https://github.com/openzim/nautilus).
 * Make sure it's `py3.6+` compatible.
 * Use [black](https://github.com/psf/black) code formatting.
+
+#### templates
+
+In-JS templates uses [handlebars](https://handlebarsjs.com). When editing them, always recompile them all into precompiled.js:
+
+```
+handlebars nautiluszim/templates -f nautiluszim/templates/assets/templates/precompiled.js
+```
 
 ## notes
 

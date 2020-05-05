@@ -125,3 +125,4 @@ dmypy.json
 .pyre/
 
 nautiluszim/templates/vendors/*
+precompiled.js

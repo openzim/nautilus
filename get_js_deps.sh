@@ -84,3 +84,7 @@ mv file-icon-vectors/dist/icons/square-o $VENDORS_PATH/ext-icons
 cp -v $VENDORS_PATH/ext-icons/ppt.svg $VENDORS_PATH/ext-icons/odp.svg
 rm -rf file-icon-vectors
 rm -f file-icon-vectors-1.0.zip
+
+echo "getting handlebars.js"
+wget -c -O $VENDORS_PATH/handlebars.runtime.min-v4.7.6.js https://s3.amazonaws.com/builds.handlebarsjs.com/handlebars.runtime.min-v4.7.6.js
+
