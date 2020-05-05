@@ -7,6 +7,7 @@ import re
 import json
 import locale
 import shutil
+import pathlib
 import datetime
 import subprocess
 from pathlib import Path
@@ -140,7 +141,7 @@ class Nautilus(object):
         return (
             self.output_dir.joinpath("archive.zip")
             if self.archive.startswith("http")
-            else self.archive
+            else pathlib.Path(self.archive).expanduser().resolve()
         )
 
     @property

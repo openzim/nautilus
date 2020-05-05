@@ -1,6 +1,7 @@
 Version 1.0.2
     Using zimcraperlib 1.0.5+
     adjusting log level (DEBUG) on `--debug`
+    --archive to work with user's home path (~)
 
 Version 1.0.1
     using zimscraperlib 1.0.2
