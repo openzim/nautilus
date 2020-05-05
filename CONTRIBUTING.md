@@ -38,6 +38,14 @@ nautilus-env/bin/python nautiluszim --help
 * Make sure it's `py3.6+` compatible.
 * Use [black](https://github.com/psf/black) code formatting.
 
+#### templates
+
+In-JS templates uses [handlebars](https://handlebarsjs.com). When editing them, allways produce and push the compiled version as well:
+
+```
+handlebars nautiluszim/templates -f nautiluszim/templates/assets/templates/precompiled.js
+```
+
 ## notes
 
 In order to support all platform for audio/video playback, we use `ogv.js`, to play ogv/ogg files on browsers that don't support it. Using `video.js`, we default to native playback if supported.

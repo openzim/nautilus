@@ -71,6 +71,8 @@
     <script src="vendors/ogvjs/ogv.js"></script>
     <script src="vendors/videojs-ogvjs.js"></script>
 
+    <script src="vendors/handlebars.runtime.min-v4.7.6.js"></script>
+    <script src="assets/templates/precompiled.js"></script>
     <script src="vendors/sugar.min.js"></script>
     <script src="nautilus.js"></script>
     <script type="text/javascript">
@@ -82,6 +84,7 @@
                 show_author: {{ show_author|lower }},
                 show_description: {{ show_description|lower }},
                 debug: {{ debug }},
+                i18n: {loading: "{{ loading_label}}",},
             });
             window.nautilus.start();
         });

@@ -1,0 +1,9 @@
+{{#each doc.items}}
+  <p><a href="{{this.fpath}}"><img style="width: 2rem;" src="{{this.icon}}" /> {{this.fname}}</a>
+  {{#if this.is_file}}{{else}}
+  <{{kind}} class="video-js vjs-default-skin nautilus-{{kind}}">
+  <source src="{{this.fpath}}" type="{{this.mime}}" /></{{kind}}>
+  {{/if}}
+</p>
+{{/each}}
+<script>$('.video-js').each(function(){ videojs($(this)[0], videojs_options)});</script>

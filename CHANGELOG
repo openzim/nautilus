@@ -2,6 +2,9 @@ Version 1.0.2
     Using zimcraperlib 1.0.5+
     adjusting log level (DEBUG) on `--debug`
     --archive to work with user's home path (~)
+    Added support for multi-format items #11
+    Fixed i18n #13
+    Added support for videos (and more audio formats) #2
 
 Version 1.0.1
     using zimscraperlib 1.0.2
