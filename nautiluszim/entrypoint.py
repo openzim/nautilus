@@ -127,6 +127,11 @@ def main():
     )
 
     parser.add_argument(
+        "--about",
+        help="Custom about HTML file. Uses file `about.html` of archive if present otherwise.",
+    )
+
+    parser.add_argument(
         "--version",
         help="Display scraper version and exit",
         action="version",

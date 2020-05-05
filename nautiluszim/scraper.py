@@ -53,6 +53,7 @@ class Nautilus(object):
         secondary_logo=None,
         main_color=None,
         secondary_color=None,
+        about=None,
     ):
         # options & zim params
         self.archive = archive
@@ -73,6 +74,7 @@ class Nautilus(object):
         self.secondary_logo = secondary_logo
         self.main_color = main_color
         self.secondary_color = secondary_color
+        self.about = about
 
         # process-related
         self.output_dir = Path(output_dir).expanduser().resolve()
@@ -229,6 +231,7 @@ class Nautilus(object):
                     self.secondary_logo,
                     self.main_color,
                     self.secondary_color,
+                    self.about,
                 )
             ]
         ):
@@ -255,6 +258,11 @@ class Nautilus(object):
         if self.secondary_color and not is_hex_color(self.secondary_color):
             raise ValueError(
                 f"--secondary_color-color is not a valid hex color: {self.secondary_color}"
+            )
+
+        if self.about:
+            handle_user_provided_file(
+                source=self.about, dest=self.build_dir / "about.html"
             )
 
     def update_metadata(self):
@@ -286,6 +294,18 @@ class Nautilus(object):
             main_color = secondary_color = get_colors(self.main_logo_path)[1]
         self.main_color = self.main_color or main_color
         self.secondary_color = self.secondary_color or secondary_color
+
+        # get about content from param, archive or defaults to desc
+        self.about_content = f"<p>{self.description}</p>"
+        about_source = self.build_dir / "about.html"
+        if about_source.exists():
+            with open(about_source, "r") as fh:
+                self.about_content = fh.read()
+            about_source.unlink(missing_ok=True)
+        else:
+            about_source = about_source.parent / "files" / "about.html"
+            with open(about_source, "r") as fh:
+                self.about_content = fh.read()
 
     def download_and_extract_archive(self):
         # download if it's a URL
@@ -340,6 +360,9 @@ class Nautilus(object):
             loading_label=_("Loading…"),
             no_result_text=_("No result for this search request."),
             backtotop_label=_("Back to Top"),
+            secondary_logo=self.secondary_logo,
+            about_label=_("About this content"),
+            about_content=self.about_content,
         )
         with open(self.build_dir.joinpath("home.html"), "w", encoding="utf-8") as fp:
             fp.write(html)

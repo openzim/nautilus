@@ -8,7 +8,7 @@ header {
 header img, header h1, header span {
     vertical-align: middle;
 }
-header img {
+header img.logo {
     margin-left: 1rem;
 }
 header h1 {
@@ -37,6 +37,15 @@ footer {
     position: fixed;
     bottom: 2em;
     right: 2em;
+}
+
+.about-btn {
+    cursor: pointer;
+    position: fixed;
+    color: white;
+}
+.about-btn img {
+    width: 1rem;
 }
 
 /* search */
@@ -79,6 +88,15 @@ footer {
 .modal-body img.icon {
     width: 2rem;
 }
+
+/* about */
+.modal-body .h1, .modal-body h1{font-size:1.5rem}
+.modal-body .h2, .modal-body h2{font-size:1rem}
+.modal-body .h3, .modal-body h3{font-size:.75rem}
+.modal-body .h4, .modal-body h4{font-size:.5rem}
+.modal-body .h5, .modal-body h5{font-size:.25rem}
+.modal-body .h6, .modal-body h6{font-size:.1rem}
+#about-content { display: none !important; }
 
 /* event-list ; default to small screen */
 .event-list {
