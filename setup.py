@@ -21,6 +21,7 @@ subprocess.run([str(root_dir.joinpath("get_js_deps.sh").resolve())], check=True)
 print("Compile handlebars templates")
 subprocess.run(
     [
+        "/usr/bin/env",
         "handlebars",
         str(root_dir / "nautiluszim" / "templates"),
         "-f",
