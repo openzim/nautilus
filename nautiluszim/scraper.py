@@ -21,7 +21,9 @@ from zimscraperlib.inputs import handle_user_provided_file
 from zimscraperlib.i18n import setlocale, get_language_details
 from zimscraperlib.imaging import resize_image, get_colors, is_hex_color, create_favicon
 
-from .constants import logger, ROOT_DIR, SCRAPER
+from .constants import ROOT_DIR, SCRAPER, getLogger
+
+logger = getLogger()
 
 
 class Nautilus(object):

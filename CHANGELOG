@@ -1,3 +1,7 @@
+Version 1.0.2
+    Using zimcraperlib 1.0.5+
+    adjusting log level (DEBUG) on `--debug`
+
 Version 1.0.1
     using zimscraperlib 1.0.2
     using handle_user_provided_file from lib

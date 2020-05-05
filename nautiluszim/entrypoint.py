@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
-import logging
 import argparse
 
-from .constants import NAME, SCRAPER, logger
-from .scraper import Nautilus
+from .constants import NAME, SCRAPER, getLogger, setDebug
 
 
 def main():
@@ -136,7 +134,10 @@ def main():
     )
 
     args = parser.parse_args()
-    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
+
+    setDebug(args.debug)
+    logger = getLogger()
+    from .scraper import Nautilus
 
     try:
         scraper = Nautilus(**dict(args._get_kwargs()))

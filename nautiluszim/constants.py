@@ -5,7 +5,7 @@
 import pathlib
 import logging
 
-from zimscraperlib.logging import getLogger
+from zimscraperlib.logging import getLogger as lib_getLogger
 
 ROOT_DIR = pathlib.Path(__file__).parent
 NAME = ROOT_DIR.name
@@ -13,7 +13,16 @@ NAME = ROOT_DIR.name
 with open(ROOT_DIR.joinpath("VERSION"), "r") as fh:
     VERSION = fh.read().strip()
 
-
 SCRAPER = f"{NAME} {VERSION}"
+DEBUG = False
 
-logger = getLogger(NAME, level=logging.DEBUG)
+
+def setDebug(debug):
+    """ toggle constants global DEBUG flag (used by getLogger) """
+    global DEBUG
+    DEBUG = bool(debug)
+
+
+def getLogger():
+    """ configured logger respecting DEBUG flag """
+    return lib_getLogger(NAME, level=logging.DEBUG if DEBUG else logging.INFO)
