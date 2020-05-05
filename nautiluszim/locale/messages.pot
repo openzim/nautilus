@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-02-03 09:11+0000\n"
+"POT-Creation-Date: 2020-05-05 20:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.7.0\n"
 
-#: nautiluszim/scraper.py:332
+#: nautiluszim/scraper.py:357
 msgid "Search"
 msgstr ""
 
-#: nautiluszim/scraper.py:333
+#: nautiluszim/scraper.py:358
 msgid "Keywords…"
 msgstr ""
 
-#: nautiluszim/scraper.py:334
+#: nautiluszim/scraper.py:359
 msgid "Close"
 msgstr ""
 
-#: nautiluszim/scraper.py:335
+#: nautiluszim/scraper.py:360
 msgid "Loading…"
 msgstr ""
 
-#: nautiluszim/scraper.py:336
+#: nautiluszim/scraper.py:361
 msgid "No result for this search request."
 msgstr ""
 
-#: nautiluszim/scraper.py:337
+#: nautiluszim/scraper.py:362
 msgid "Back to Top"
+msgstr ""
+
+#: nautiluszim/scraper.py:364
+msgid "About this content"
 msgstr ""
 
