@@ -33,6 +33,7 @@ class Nautilus(object):
         archive,
         collection,
         nb_items_per_page,
+        no_random,
         show_description,
         output_dir,
         no_zim,
@@ -75,6 +76,7 @@ class Nautilus(object):
         self.main_color = main_color
         self.secondary_color = secondary_color
         self.about = about
+        self.randomize = not no_random
 
         # process-related
         self.output_dir = Path(output_dir).expanduser().resolve()
@@ -354,6 +356,7 @@ class Nautilus(object):
             nb_items_per_page=self.nb_items_per_page,
             show_author=self.show_author,
             show_description=self.show_description,
+            randomize=self.randomize,
             search_label=_("Search"),
             search_input_label=_("Keywords…"),
             close_label=_("Close"),

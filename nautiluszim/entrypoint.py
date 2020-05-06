@@ -37,6 +37,14 @@ def main():
     )
 
     parser.add_argument(
+        "--no-random",
+        help="Don't randomize items in list",
+        action="store_true",
+        default=False,
+        dest="no_random",
+    )
+
+    parser.add_argument(
         "--show-description",
         help="Show description in main list",
         action="store_true",

@@ -31,6 +31,7 @@ var Nautilus = (function() {
     in_zim: IS_IN_ZIM,
     files_prefix: 'files/',
     show_description: true,
+    randomize: true,
     show_author: true,
     audio_extensions: ["ogg", "mp3", "aif", "mpa", "wav", "wma"],
     video_extensions: ["webm", "ogv", "mp4", "mpg", "mpeg", "avi", "mkv", "mov", "wmv", "m4v", "h264", "3gp"],
@@ -56,6 +57,7 @@ var Nautilus = (function() {
     this.search_text = "";
     this.search_cursor = 0;
     this.end_of_results = false;
+    this.list_cursor = 0;
 
     // scroll related
     this.should_scroll = true;
@@ -100,8 +102,9 @@ var Nautilus = (function() {
     this.console.debug("database ready", this.doc_count, "documents");
 
     if (this.doc_count <= this.options.nb_items_per_page) {
-      this.console.debug("doc count <= items-per-page, adjusting scroll and cursor");
+      this.console.debug("doc count lte pagination, adjusting: scroll, cursor, random");
       this.should_scroll = false;
+      this.options.randomize = false;
       this.removeInfiniteScroll();
       this.options.nb_items_per_page = this.doc_count;
     }
@@ -253,6 +256,8 @@ var Nautilus = (function() {
   /*** SCROLL ***/
   Nautilus.prototype.init_scroll = function () {
     var _this = this;
+    if (!this.should_scroll)
+      return;
     this.scroll_scene = new ScrollMagic.Scene(
         {triggerElement: ".scrollable-content #loader", triggerHook: "onEnter"})
       .addTo(this.scroll_ctrl)
@@ -373,6 +378,11 @@ var Nautilus = (function() {
     $("#loader").hide();
   };
 
+  Nautilus.prototype.on_no_more_item_result = function() {
+    this.disableInfiniteScroll();
+    $("#loader").hide();
+  };
+
   Nautilus.prototype.on_rows_updated = function () {
     if (!this.should_scroll)
       return;
@@ -392,6 +402,9 @@ var Nautilus = (function() {
     if (pident.kind == "search") {
       options = pident.cursor.toString() + "_" + pident.text.trim();
     }
+    if (pident.kind == "list") {
+      options = pident.cursor.toString();
+    }
     this.ident = pident.kind + "-" + pident.modalId + "-" + options;
     window.location.hash = this.ident;
   }
@@ -406,6 +419,7 @@ var Nautilus = (function() {
     // format::  {kind}-{modalId}-{options}
     // rando::   random-{modalId}-{id}.{id}.{id}
     // search::  search-{modalId}-{cursor}_{text}
+    // list::    list-{modalId}-{cursor}
 
     if (ident === undefined)
       ident = this.ident;
@@ -434,6 +448,13 @@ var Nautilus = (function() {
         cursor = parseInt(opt_parts.pop().trim()) || 0;
     }
 
+    if (kind == "list") {
+      let opt_parts = options.split("_", 1);
+      cursor = 0;
+      if (opt_parts.length)
+        cursor = parseInt(opt_parts.pop().trim()) || 0;
+    }
+
     return {
       'kind': kind,
       'modalId': modalId,
@@ -457,6 +478,8 @@ var Nautilus = (function() {
     else if (pident.kind == "search") {
         $("#search_text").val(pident.text);
         this.search(pident.text, pident.cursor);
+    } else if (pident.kind == "list") {
+        this.getNextDocuments(this.displayRows, pident.cursor);
     } else {
       this.console.debug("invalid ident!");
       this.resetIdent({});
@@ -473,7 +496,10 @@ var Nautilus = (function() {
     if (this.in_search) {
       this.getSearchResults(this.search_text, this.displayRows);
     } else {
-      this.getRandomDocuments(this.displayRows);
+      if (this.options.randomize)
+        this.getRandomDocuments(this.displayRows);
+      else
+       this.getNextDocuments(this.displayRows);
     }
   };
 
@@ -500,13 +526,47 @@ var Nautilus = (function() {
       });
   };
 
+  Nautilus.prototype.getNextDocuments = function (on_complete, cursor) {
+    this.console.debug("getting list results", cursor);
+    var _this = this;
+    _this.list_cursor = cursor || _this.list_cursor;
+    let query = {};
+    let skip = _this.list_cursor || 0;
+    let findOpts = {selector: query,
+                    fields: ['ti', 'dsc', 'aut', 'fp', '_id'],
+                    skip: skip,
+                    limit: _this.options.nb_items_per_page};
+
+    this.resetIdent({kind: "list", cursor: skip});
+
+    this.db.find(findOpts).then(function (result) {
+      if (!result || !result.docs || !result.docs.length) {
+        return;
+      }
+      if (result.docs.length < findOpts.limit) {
+        _this.on_no_more_item_result();
+      }
+      _this.list_cursor += result.docs.length;
+
+      let rows = [];
+      result.docs.forEach((doc) => {
+        rows.push(_this.getItemFor(doc));
+      });
+
+      if (on_complete)
+        on_complete.apply(_this, [rows]);
+    }).catch(function (err) {
+      _this.console.error("Error querying docs.", err);
+    });
+  };
+
   Nautilus.prototype.getRandomDocuments = function (on_complete) {
     var _this = this;
     function getRandomInt(max) {
       return Math.floor(Math.random() * max);
     }
 
-    _this.console.log("displayRandomDocuments", this.doc_count, this.options.nb_items_per_page);
+    _this.console.log("getRandomDocuments", this.doc_count, this.options.nb_items_per_page);
     let seq_ids = [];
     for (var i=0; i<this.options.nb_items_per_page;i++) {
       seq_ids.push(getRandomInt(this.doc_count).toString());
