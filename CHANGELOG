@@ -1,3 +1,6 @@
+Version 1.0.3
+    Fixed docker image
+
 Version 1.0.2
     Using zimcraperlib 1.0.5+
     adjusting log level (DEBUG) on `--debug`
