@@ -58,6 +58,7 @@ var Nautilus = (function() {
     this.end_of_results = false;
 
     // scroll related
+    this.should_scroll = true;
     this.scroll_ctrl = new ScrollMagic.Controller();
     this.scroll_scene = null;
   }
@@ -97,6 +98,14 @@ var Nautilus = (function() {
   Nautilus.prototype.on_database_ready = function(db_info) {
     this.doc_count = db_info.doc_count;
     this.console.debug("database ready", this.doc_count, "documents");
+
+    if (this.doc_count <= this.options.nb_items_per_page) {
+      this.console.debug("doc count <= items-per-page, adjusting scroll and cursor");
+      this.should_scroll = false;
+      this.removeInfiniteScroll();
+      this.options.nb_items_per_page = this.doc_count;
+    }
+
     if (this.ident)
       this.restoreState(this.ident);
     else
@@ -339,7 +348,10 @@ var Nautilus = (function() {
       this.scroll_scene.update();
   };
 
+  // entirely disabled the auto-scrolling feature
+  Nautilus.prototype.removeInfiniteScroll = function () { $("#loader").remove(); }
   Nautilus.prototype.enableInfiniteScroll = function () { this.toggleInfiniteScroll(true); }
+  // temporarily disable scrolling
   Nautilus.prototype.disableInfiniteScroll = function () { this.toggleInfiniteScroll(false); }
   Nautilus.prototype.toggleInfiniteScroll = function (enable) {
     if (enable)
@@ -362,6 +374,8 @@ var Nautilus = (function() {
   };
 
   Nautilus.prototype.on_rows_updated = function () {
+    if (!this.should_scroll)
+      return;
     this.update_sroll_scene(); // make sure the scene gets the new start position
     this.disableInfiniteScroll();
   };
