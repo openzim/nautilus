@@ -233,8 +233,9 @@ var Nautilus = (function() {
   }
 
   Nautilus.prototype.init_backtotop = function () {
-    $('.back-to-top').click(function (e) {
+    $('.back-to-top').on('click', function (e) {
       e.preventDefault();
+      $(this).tooltip('hide');
       $('body,html').animate({scrollTop: 0}, 400);
       return false;
     });
