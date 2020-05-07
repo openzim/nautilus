@@ -11,7 +11,6 @@ import pathlib
 import datetime
 import subprocess
 from pathlib import Path
-from gettext import gettext as _
 
 import jinja2
 from zimscraperlib.logging import nicer_args_join
@@ -19,7 +18,7 @@ from zimscraperlib.download import save_large_file
 from zimscraperlib.zim import ZimInfo, make_zim_file
 from zimscraperlib.fix_ogvjs_dist import fix_source_dir
 from zimscraperlib.inputs import handle_user_provided_file
-from zimscraperlib.i18n import setlocale, get_language_details
+from zimscraperlib.i18n import setlocale, get_language_details, _
 from zimscraperlib.imaging import resize_image, get_colors, is_hex_color, create_favicon
 
 from .constants import ROOT_DIR, SCRAPER, getLogger
