@@ -15,7 +15,7 @@ To be used with nautilus, your archive should be a ZIP file.
 
 * it doesn't need to be structured, but it can.
 * it doesn't need to be compressed. It's usually recommended not to.
-* it should contain a `collection.json` file, but not required (see bellow).
+* it should contain a `collection.json` file, but it can also provided separately (see below).
 * it should only contain to-be-included files. No filtering is done.
 * Audio and video files should be in ogg format with `.ogg`/`.ogv` extension to be supported on all platform (`mp3`/`mp4` would work only on platform with native support).
 
