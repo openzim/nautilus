@@ -1,3 +1,6 @@
+Version 1.0.6.dev0
+    fixed usage on older browsers (without ES6 support)
+
 Version 1.0.5
     Hide Picture-in-Picture toggle on videos
 
