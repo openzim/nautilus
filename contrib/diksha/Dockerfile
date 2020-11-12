@@ -1,5 +1,10 @@
 FROM python:3.8
 
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 VOLUME /src/data
 
 WORKDIR /src
