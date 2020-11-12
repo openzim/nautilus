@@ -305,8 +305,9 @@ class Nautilus(object):
             about_source.unlink(missing_ok=True)
         else:
             about_source = about_source.parent / "files" / "about.html"
-            with open(about_source, "r") as fh:
-                self.about_content = fh.read()
+            if about_source.exists():
+                with open(about_source, "r") as fh:
+                    self.about_content = fh.read()
 
     def download_and_extract_archive(self):
         # download if it's a URL
