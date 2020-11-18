@@ -287,6 +287,12 @@ var Nautilus = (function() {
     return this.get_image_path("vendors/ext-icons/" + extension + ".svg");
   };
 
+  Nautilus.prototype.encodePath = function (fpath) {
+    var parts = fpath.split("/");
+    parts[parts.length -1] = encodeURIComponent(parts[parts.length -1]);
+    return parts.join("/");
+  }
+
   Nautilus.prototype.getDetailsFor = function (fname) {
     let fpath = this.get_file_path(fname);
     let extension = this.getExtensionFor(fname);
@@ -306,7 +312,7 @@ var Nautilus = (function() {
     }
     return {
       fname: fname,
-      fpath: fpath,
+      fpath: this.encodePath(fpath),
       extension: extension,
       is_audio: is_audio,
       is_video: is_video,

@@ -60,9 +60,10 @@ def create_collection_for(ws, overwrite=False):
         fpath = data_dir / fname if fname else None
         # download if we dont already have it
         if not fname or (fpath and not fpath.exists()) or overwrite:
-            fname = gdown.download(
+            fpath = gdown.download(
                 f"https://drive.google.com/uc?id={gid}", output=f"{data_dir}/"
             )
+            fname = fpath.relative_to(data_dir).name
             fpath = data_dir / fname
             update_map(gid, fpath.relative_to(data_dir).name)
         else:
