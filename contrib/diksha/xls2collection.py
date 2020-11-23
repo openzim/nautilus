@@ -13,6 +13,9 @@ from contextlib import contextmanager
 import gdown
 from slugify import slugify
 from openpyxl import load_workbook
+from zimscraperlib.video.presets import VideoWebmHigh
+from zimscraperlib.video.encoding import reencode
+
 
 DATA_DIR = pathlib.Path("data").resolve()
 FILENAMES_MAP_PATH = pathlib.Path("filenames.map")
@@ -60,11 +63,21 @@ def create_collection_for(ws, overwrite=False):
         fpath = data_dir / fname if fname else None
         # download if we dont already have it
         if not fname or (fpath and not fpath.exists()) or overwrite:
-            fpath = gdown.download(
-                f"https://drive.google.com/uc?id={gid}", output=f"{data_dir}/"
+            fpath = pathlib.Path(
+                gdown.download(
+                    f"https://drive.google.com/uc?id={gid}", output=f"{data_dir}/"
+                )
             )
-            fname = fpath.relative_to(data_dir).name
-            fpath = data_dir / fname
+            orig_fpath = data_dir / fpath.relative_to(data_dir).name
+            fpath = orig_fpath.with_suffix(".webm")
+            # reencode video to webm
+            reencode(
+                orig_fpath,
+                fpath,
+                VideoWebmHigh().to_ffmpeg_args(),
+                delete_src=True,
+            )
+
             update_map(gid, fpath.relative_to(data_dir).name)
         else:
             print("  Skipping download")
@@ -75,7 +88,7 @@ def create_collection_for(ws, overwrite=False):
                 "title": c_title.value,
                 "description": c_desc.value,
                 "authors": c_auth.value,
-                "files": [str(fname)],
+                "files": [str(fpath.name)],
             }
         )
 
