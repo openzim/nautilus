@@ -1,7 +1,8 @@
-Version 1.0.6.dev0
+Version 1.0.6
     fixed usage on older browsers (without ES6 support)
     fixed behavior when no providing an about page
     fixed broken links on files with special chars
+    using zimwriterfs 2.1.0-1
 
 Version 1.0.5
     Hide Picture-in-Picture toggle on videos

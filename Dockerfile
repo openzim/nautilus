@@ -1,10 +1,10 @@
 FROM python:3.8
 
 # add zimwriterfs
-RUN wget http://download.openzim.org/release/zimwriterfs/zimwriterfs_linux-x86_64-1.3.9.tar.gz
-RUN tar -C /usr/bin --strip-components 1 -xf zimwriterfs_linux-x86_64-1.3.9.tar.gz
-RUN rm -f zimwriterfs_linux-x86_64-1.3.9.tar.gz
-RUN chmod +x /usr/bin/zimwriterfs
+RUN wget -L http://download.openzim.org/release/zim-tools/zim-tools_linux-x86_64-2.1.0-1.tar.gz \
+    && tar xf zim-tools_linux-x86_64-2.1.0-1.tar.gz \
+    && mv zim-tools_linux-x86_64-2.1.0-1/zim* /usr/bin/ \
+    && rmdir zim-tools_linux-x86_64-2.1.0-1
 RUN zimwriterfs --version
 
 # Install necessary packages
