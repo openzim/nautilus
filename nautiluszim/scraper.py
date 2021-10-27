@@ -3,7 +3,7 @@
 # vim: ai ts=4 sts=4 et sw=4 nu
 
 import os
-import re
+import uuid
 import json
 import locale
 import shutil
@@ -351,8 +351,8 @@ class Nautilus(object):
             description=self.description,
             main_color=self.main_color,
             secondary_color=self.secondary_color,
-            db_name=f"{self.name}_db",
-            db_version=int(re.sub(r"([^0-9])", "", self.period)[-4:]),
+            db_name=f"{self.name}_{self.period}_{uuid.uuid4().hex}_db",
+            db_version=1,
             nb_items_per_page=self.nb_items_per_page,
             show_author=self.show_author,
             show_description=self.show_description,
