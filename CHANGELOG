@@ -1,3 +1,6 @@
+Version 1.0.7
+    removed inline JS in homepage (#34)
+
 Version 1.0.6
     fixed usage on older browsers (without ES6 support)
     fixed behavior when no providing an about page

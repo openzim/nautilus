@@ -144,7 +144,7 @@ var Nautilus = (function() {
         .then(() => {
           const end = Date.now();
           _this.console.log('time ran:', (end - start) / 1000, 'seconds');
-          
+
           _this.db.info().then(function (db_info) {
             if (_this.options.index_database) {
               _this.index_database(db_info);
@@ -526,11 +526,11 @@ var Nautilus = (function() {
             rows.push(_this.getItemFor(row.doc));
           }
         })
-        
+
         if (on_complete) {
           on_complete.apply(_this, [rows]);
         }
-        
+
       }).catch(function (err) {
         _this.console.error("Error in getting documents", doc_ids, err);
       });

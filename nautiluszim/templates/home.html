@@ -79,24 +79,7 @@
     <script src="assets/templates/precompiled.js"></script>
     <script src="vendors/sugar.min.js"></script>
     <script src="nautilus.js"></script>
-    <script type="text/javascript">
-        $( document ).ready(function() {
-            $('[data-toggle="tooltip"]').tooltip();
-            window.nautilus = new Nautilus({
-                title: "{{ title }}",
-                description: "{{ description }}",
-                database_name: "{{ db_name }}.{{ db_version }}",
-                database_version: "{{ db_version }}",
-                nb_items_per_page: {{ nb_items_per_page }},
-                show_author: {{ show_author|lower }},
-                show_description: {{ show_description|lower }},
-                randomize: {{ randomize|lower }},
-                debug: {{ debug }},
-                i18n: {loading: "{{ loading_label}}",},
-            });
-            window.nautilus.start();
-        });
-    </script>
+    <script src="init.js"></script>
     <div id="about-content">
         {{about_content|safe}}
         {% if secondary_logo %}<hr /><img src="assets/secondary-logo.png" />{% endif %}

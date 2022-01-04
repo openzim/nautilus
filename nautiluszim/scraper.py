@@ -370,6 +370,21 @@ class Nautilus(object):
         with open(self.build_dir.joinpath("home.html"), "w", encoding="utf-8") as fp:
             fp.write(html)
 
+        initjs = env.get_template("init.js").render(
+            debug=str(self.debug).lower(),
+            title=self.title,
+            description=self.description,
+            db_name=f"{self.name}_{self.period}_{uuid.uuid4().hex}_db",
+            db_version=1,
+            nb_items_per_page=self.nb_items_per_page,
+            show_author=self.show_author,
+            show_description=self.show_description,
+            randomize=self.randomize,
+            loading_label=_("Loading…"),
+        )
+        with open(self.build_dir.joinpath("init.js"), "w", encoding="utf-8") as fp:
+            fp.write(initjs)
+
         with open(self.build_dir.joinpath("database.js"), "w", encoding="utf-8") as fp:
             fp.write("var DATABASE = [\n")
             for docid, document in enumerate(self.json_collection):
