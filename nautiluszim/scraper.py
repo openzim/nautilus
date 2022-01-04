@@ -392,7 +392,7 @@ class Nautilus(object):
                     "{},\n".format(
                         str(
                             {
-                                "_id": str(docid),
+                                "_id": str(docid).zfill(5),
                                 "ti": document.get("title") or "Unknown?",
                                 "dsc": document.get("description") or "",
                                 "aut": document.get("authors") or "",
