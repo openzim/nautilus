@@ -327,13 +327,14 @@ var Nautilus = (function() {
     }
 
     let details = this.getDetailsFor(fp);
-    if (details.is_audio || details.is_video || multiple)
-      target = "javascript:nautilus.openMediaPlayer('" + db_doc._id + "');";
+    let popup = (details.is_audio || details.is_video || multiple) ? 1 : 0;
 
     let row = {
+      docid: db_doc._id,
       title: db_doc.ti,
       author: this.options.show_author ? db_doc.aut : null,
       description: this.options.show_description ? db_doc.dsc : null,
+      popup: popup,
       target: target,
       multiple: multiple,
     };
@@ -348,7 +349,7 @@ var Nautilus = (function() {
     _this.on_rows_updated();
   };
 
-  Nautilus.prototype.update_sroll_scene = function () {
+  Nautilus.prototype.update_scroll_scene = function () {
     if (this.scroll_scene == null)
       this.init_scroll();
     else
@@ -386,9 +387,17 @@ var Nautilus = (function() {
   };
 
   Nautilus.prototype.on_rows_updated = function () {
+    // register popup links
+    var _this = this;
+    $("a[data-popup=1]").on("click", function (e) {
+      e.preventDefault();
+      console.log("###", e.target, e);
+      let doc_id = $(e.currentTarget).data("doc-id");
+      _this.openMediaPlayer(doc_id);
+    });
     if (!this.should_scroll)
       return;
-    this.update_sroll_scene(); // make sure the scene gets the new start position
+    this.update_scroll_scene(); // make sure the scene gets the new start position
     this.disableInfiniteScroll();
   };
 

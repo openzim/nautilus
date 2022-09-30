@@ -212,7 +212,7 @@ class Nautilus(object):
 
         fix_source_dir(self.build_dir.joinpath("vendors"))
 
-        for fname in ["nautilus.js", "favicon.png"]:
+        for fname in ["nautilus.js", "favicon.png", "load_videojs.js"]:
             target = self.build_dir.joinpath(fname)
             try:
                 target.unlink()

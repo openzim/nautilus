@@ -11,6 +11,7 @@ as of 1.3.0.
 ### Changed
 
 - Replaced zimwriterfs with zimscraperlib –using libzim 7 without namespaces– (#41)
+- Removed inline javascript to comply with some CSP (#34)
 
 ## [1.2.1] - 2022-08-03
 

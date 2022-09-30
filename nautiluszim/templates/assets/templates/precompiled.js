@@ -10,6 +10,10 @@ templates['display_rows'] = template({"1":function(container,depth0,helpers,part
 
   return "  <li>\n      <span class=\"icon\">\n        <a href=\""
     + alias4(((helper = (helper = lookupProperty(helpers,"target") || (depth0 != null ? lookupProperty(depth0,"target") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"target","hash":{},"data":data,"loc":{"start":{"line":4,"column":17},"end":{"line":4,"column":27}}}) : helper)))
+    + "\" data-doc-id=\""
+    + alias4(((helper = (helper = lookupProperty(helpers,"docid") || (depth0 != null ? lookupProperty(depth0,"docid") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"docid","hash":{},"data":data,"loc":{"start":{"line":4,"column":42},"end":{"line":4,"column":51}}}) : helper)))
+    + "\" data-popup=\""
+    + alias4(((helper = (helper = lookupProperty(helpers,"popup") || (depth0 != null ? lookupProperty(depth0,"popup") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"popup","hash":{},"data":data,"loc":{"start":{"line":4,"column":65},"end":{"line":4,"column":74}}}) : helper)))
     + "\" class=\"btn btn-neutral\">\n          <img src=\""
     + alias4(((helper = (helper = lookupProperty(helpers,"icon") || (depth0 != null ? lookupProperty(depth0,"icon") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"icon","hash":{},"data":data,"loc":{"start":{"line":5,"column":20},"end":{"line":5,"column":28}}}) : helper)))
     + "\" />\n        </a>\n      </span>\n      <div class=\"info\">\n        <h2 class=\"title\">"
@@ -97,7 +101,7 @@ templates['media_player'] = template({"1":function(container,depth0,helpers,part
     };
 
   return ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),((stack1 = (depth0 != null ? lookupProperty(depth0,"doc") : depth0)) != null ? lookupProperty(stack1,"items") : stack1),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":1,"column":0},"end":{"line":8,"column":9}}})) != null ? stack1 : "")
-    + "<script>$('.video-js').each(function(){ videojs($(this)[0], videojs_options)});</script>\n";
+    + "<script src=\"load_videojs.js\"></script>\n";
 },"useData":true});
 templates['modal_empty_body'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
