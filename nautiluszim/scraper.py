@@ -15,7 +15,7 @@ from pathlib import Path
 import jinja2
 from zimscraperlib.logging import nicer_args_join
 from zimscraperlib.download import save_large_file
-from zimscraperlib.zim import ZimInfo, make_zim_file
+from zimscraperlib.zim.filesystem import make_zim_file
 from zimscraperlib.fix_ogvjs_dist import fix_source_dir
 from zimscraperlib.inputs import handle_user_provided_file
 from zimscraperlib.i18n import setlocale, get_language_details, _
@@ -90,7 +90,7 @@ class Nautilus(object):
         self.build_dir = self.output_dir.joinpath("build")
 
         # store ZIM-related info
-        self.zim_info = ZimInfo(
+        self.zim_info = dict(
             language=language,
             tags=tags,
             title=title,
@@ -184,8 +184,13 @@ class Nautilus(object):
                 self.fname if self.fname else f"{self.name}_{self.period}.zim"
             )
             logger.info("building ZIM file")
-            print(self.zim_info.to_zimwriterfs_args())
-            make_zim_file(self.build_dir, self.output_dir, self.fname, self.zim_info)
+            make_zim_file(
+                build_dir=self.build_dir,
+                fpath=self.output_dir / self.fname,
+                main_page="home.html",
+                favicon="favicon.png",
+                date=datetime.date.today(),
+                **self.zim_info)
             logger.info("removing HTML folder")
             if not self.keep_build_dir:
                 shutil.rmtree(self.build_dir, ignore_errors=True)
@@ -205,9 +210,9 @@ class Nautilus(object):
                 shutil.rmtree(target)
             shutil.copytree(self.templates_dir.joinpath(folder), target)
 
-        fix_source_dir(self.build_dir.joinpath("vendors"), "vendors")
+        fix_source_dir(self.build_dir.joinpath("vendors"))
 
-        for fname in ["nautilus.js", "zimwriterfs.js", "favicon.png"]:
+        for fname in ["nautilus.js", "favicon.png"]:
             target = self.build_dir.joinpath(fname)
             try:
                 target.unlink()
@@ -280,13 +285,14 @@ class Nautilus(object):
             self.build_dir.joinpath("favicon.ico"),
         )
 
-        self.zim_info.update(
-            title=self.title,
-            description=self.description,
-            creator=self.creator,
-            publisher=self.publisher,
-            name=self.name,
-            tags=self.tags,
+        self.zim_info.update({
+            "title": self.title,
+            "description": self.description,
+            "creator": self.creator,
+            "publisher": self.publisher,
+            "name": self.name,
+            "tags": self.tags,
+            }
         )
 
         # set colors from images if not supplied

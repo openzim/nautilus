@@ -9,7 +9,6 @@
   - handles infinite scroll for search and home (random)
 
   Dependencies:
-    - imported zimwriterfs.js script
     - PouchDB, jQuery, ScrollMagic, videojs, ogvjs, videojs-ogvjs, SugarJS
     - database.js file containing a DATABASE Array of documents.
 
@@ -28,7 +27,6 @@ var Nautilus = (function() {
     nb_items_per_page: 10,
     index_database: false,
     index_database_fields: ["ti", "aut"],
-    in_zim: IS_IN_ZIM,
     files_prefix: 'files/',
     show_description: true,
     randomize: true,
@@ -75,16 +73,10 @@ var Nautilus = (function() {
 
   /*** ZIM-RELATED ***/
   Nautilus.prototype.get_image_path = function (filepath) {
-    if (this.options.in_zim) {
-      return ZIM_IMG_NS + filepath;
-    }
     return filepath;
   }
 
   Nautilus.prototype.get_meta_path = function (filepath) {
-    if (this.options.in_zim) {
-      return ZIM_META_NS + filepath;
-    }
     return filepath;
   }
 

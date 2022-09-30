@@ -56,7 +56,6 @@ at its bottom your *secondary-logo* if provided.
 
 # Requirements
 
-* [`zimwriterfs`](https://github.com/openzim/zimwriterfs) for ZIM file packaging. Use `--no-zim` to skip this step.
 * `wget` and `unzip` to install JS dependencies. See `get_js_deps.sh` if you want to do it manually.
 * `wget` is used to download archive files as well.
 * [`handlebars`](https://handlebarsjs.com) is used to compile JS templates
