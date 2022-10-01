@@ -220,6 +220,7 @@ var Nautilus = (function() {
       let body_tmpl = Handlebars.templates.media_player;
       $('#modal .modal-title').html(title_tmpl({title: doc.title}));
       $('#modal .modal-body').html(body_tmpl({doc: doc, i18n: _this.options.i18n}));
+      $('.video-js').each(function(){ videojs($(this)[0], videojs_options)});
     });
   }
 
@@ -391,7 +392,6 @@ var Nautilus = (function() {
     var _this = this;
     $("a[data-popup=1]").on("click", function (e) {
       e.preventDefault();
-      console.log("###", e.target, e);
       let doc_id = $(e.currentTarget).data("doc-id");
       _this.openMediaPlayer(doc_id);
     });
