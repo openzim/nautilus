@@ -43,7 +43,6 @@ class Nautilus(object):
         language,
         locale_name,
         tags,
-        long_description,
         name=None,
         title=None,
         description=None,
@@ -67,7 +66,6 @@ class Nautilus(object):
         self.tags = [t.strip() for t in tags.split(",")]
         self.title = title
         self.description = description
-        self.long_description = long_description
         self.creator = creator
         self.publisher = publisher
         self.name = name
@@ -154,7 +152,7 @@ class Nautilus(object):
         return self.build_dir.joinpath("files")
 
     def run(self):
-        """execute the scrapper step by step"""
+        """ execute the scrapper step by step """
         logger.info(f"starting nautilus scraper for {self.archive}")
 
         logger.info("preparing build folder at {}".format(self.build_dir.resolve()))
@@ -195,8 +193,7 @@ class Nautilus(object):
                 main_page="home.html",
                 favicon="favicon.png",
                 date=datetime.date.today(),
-                **self.zim_info,
-            )
+                **self.zim_info)
             logger.info("removing HTML folder")
             if not self.keep_build_dir:
                 shutil.rmtree(self.build_dir, ignore_errors=True)
@@ -207,22 +204,12 @@ class Nautilus(object):
         logger.info("checking metadata")
         """checks that user supplied metadata are valid"""
 
-        """fail early if description is missing or too long"""
-        if not self.description or self.description == None:
-            raise ValueError("Description is missing")
-        else:
-            if len(self.description) > 80:
+        """fail early if description is too long"""
+        if len(self.description) > 80:
                 raise ValueError("Description is too long")
 
-        """ fail early if long_description is too long """
-        if not self.long_description or self.long_description == None:
-            return
-        else:
-            if len(self.long_description) > 4000:
-                raise ValueError("Long description is too long")
-
     def make_build_folder(self):
-        """prepare build folder before we start downloading data"""
+        """ prepare build folder before we start downloading data """
 
         # create build folder
         os.makedirs(self.build_dir, exist_ok=True)
@@ -246,10 +233,10 @@ class Nautilus(object):
         os.makedirs(self.files_path, exist_ok=True)
 
     def check_branding_values(self):
-        """checks that user-supplied images and colors are valid (so to fail early)
+        """ checks that user-supplied images and colors are valid (so to fail early)
 
-        Images are checked for existence or downloaded then resized
-        Colors are check for validity"""
+            Images are checked for existence or downloaded then resized
+            Colors are check for validity """
 
         # skip this step if none of related values were supplied
         if not sum(
@@ -298,7 +285,6 @@ class Nautilus(object):
     def update_metadata(self):
         self.title = self.title or self.name
         self.description = self.description or "-"
-        self.long_description = self.long_description or "-"
         self.creator = self.creator or "Unknown"
         self.publisher = self.publisher or "Kiwix"
 
@@ -310,14 +296,13 @@ class Nautilus(object):
             self.build_dir.joinpath("favicon.ico"),
         )
 
-        self.zim_info.update(
-            {
-                "title": self.title,
-                "description": self.description,
-                "creator": self.creator,
-                "publisher": self.publisher,
-                "name": self.name,
-                "tags": self.tags,
+        self.zim_info.update({
+            "title": self.title,
+            "description": self.description,
+            "creator": self.creator,
+            "publisher": self.publisher,
+            "name": self.name,
+            "tags": self.tags,
             }
         )
 
@@ -370,7 +355,8 @@ class Nautilus(object):
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
     def make_html_files(self):
-        """make up HTML structure to read the content"""
+        """ make up HTML structure to read the content
+        """
 
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(str(self.templates_dir)), autoescape=True
