@@ -30,7 +30,7 @@ specified via `--collection mycollection.json`, you must supply a JSON file desc
 
 The user-interface only gives access to files referenced properly in the collection.
 
-At the moment, the JSON file needs to provide the following fields for each item in an arr:
+At the moment, the JSON file needs to provide the following fields for each item in an array:
 
 ``` JSON
 [
@@ -46,7 +46,9 @@ At the moment, the JSON file needs to provide the following fields for each item
 ## About page
 
 Either inside the archive ZIP as `/about.html` or elsewhere, specified via `--about myabout.html`,
-you may supply an about page in HTML format. It will be displayed in a modal popup and will be includeat its bottom your *secondary-logo* if provided.
+
+- You may supply an about page in HTML format. It will be displayed in a modal popup and will be included.
+- At its bottom your *secondary-logo* if provided.
 
 * Use only content tags (no `<html />` nor `<head />` nor `<script />` etc)
 * Use inline styling if required, but no styling is recommended.
