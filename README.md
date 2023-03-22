@@ -4,6 +4,7 @@ Nautilus
 [![CodeFactor](https://www.codefactor.io/repository/github/openzim/nautilus/badge)](https://www.codefactor.io/repository/github/openzim/nautilus)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/nautiluszim.svg)](https://pypi.org/project/nautiluszim/)
+[![Docker](https://ghcr-badge.deta.dev/openzim/nautilus/latest_tag?label=docker)](https://ghcr.io/openzim/nautilus)
 
 `nautilus` turns a collection of documents into a browsable [ZIM file](https://openzim.org).
 
@@ -67,7 +68,7 @@ Either inside the archive ZIP as `/about.html` or elsewhere, specified via `--ab
 ## docker
 
 ```
-docker run -v my_dir:/output openzim/nautilus nautiluszim --help
+docker run -v my_dir:/output ghcr.io/openzim/nautilus nautiluszim --help
 ```
 
 ## pip
