@@ -9,7 +9,7 @@ from .constants import NAME, SCRAPER, getLogger, setDebug
 
 def main():
     parser = argparse.ArgumentParser(
-        prog=NAME, description="Create a ZIM file off a collection of file documents",
+        prog=NAME, description="Create a ZIM file off a collection of file documents"
     )
 
     parser.add_argument(
@@ -97,20 +97,18 @@ def main():
         dest="locale_name",
     )
     parser.add_argument(
-        "--tags", help="List of comma-separated Tags for the ZIM file.", default="",
+        "--tags", help="List of comma-separated Tags for the ZIM file.", default=""
     )
     parser.add_argument(
-        "--title", help="Title for your project and ZIM. Otherwise --name.",
+        "--title", help="Title for your project and ZIM. Otherwise --name."
     )
     parser.add_argument(
-        "--description", help="Description for your project and ZIM.",required=True,
+        "--description", help="Description for your project and ZIM.", required=True
     )
     parser.add_argument(
-        "--longdescription", help=" Long Description for your project and ZIM.",
+        "--longdescription", help=" Long Description for your project and ZIM."
     )
-    parser.add_argument(
-        "--creator", help="Name of content creator.",
-    )
+    parser.add_argument("--creator", help="Name of content creator.")
     parser.add_argument(
         "--publisher", help="Custom publisher name (ZIM metadata)", default="Kiwix"
     )
@@ -119,9 +117,7 @@ def main():
         help="Custom favicon. Will be resized to 48x48px. Nautilus otherwise.",
     )
     parser.add_argument(
-        "--main-logo",
-        help="Custom logo. Will be resized to 300x65px",
-        dest="main_logo",
+        "--main-logo", help="Custom logo. Will be resized to 300x65px", dest="main_logo"
     )
     parser.add_argument(
         "--secondary-logo",
@@ -167,4 +163,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
