@@ -103,7 +103,10 @@ def main():
         "--title", help="Title for your project and ZIM. Otherwise --name.",
     )
     parser.add_argument(
-        "--description", help="Description for your project and ZIM.",
+        "--description", help="Description for your project and ZIM.",required=True,
+    )
+    parser.add_argument(
+        "--longdescription", help=" Long Description for your project and ZIM.",
     )
     parser.add_argument(
         "--creator", help="Name of content creator.",
@@ -164,3 +167,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

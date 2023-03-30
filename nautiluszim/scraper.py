@@ -46,6 +46,7 @@ class Nautilus(object):
         name=None,
         title=None,
         description=None,
+        longdescription=None,
         creator=None,
         publisher=None,
         favicon=None,
@@ -66,6 +67,7 @@ class Nautilus(object):
         self.tags = [t.strip() for t in tags.split(",")]
         self.title = title
         self.description = description
+        self.long_description=longdescription;
         self.creator = creator
         self.publisher = publisher
         self.name = name
@@ -95,6 +97,7 @@ class Nautilus(object):
             tags=tags,
             title=title,
             description=description,
+            long_description=longdescription,
             creator=creator,
             publisher=publisher,
             name=name,
@@ -162,6 +165,12 @@ class Nautilus(object):
 
         # fail early if supplied branding files are missing
         self.check_branding_values()
+
+        # fail early if description length is greater than 80 characters
+        self.check_description_length()
+        
+        #fail early if long description length is greater than 4000 characters
+        self.check_long_description_length()
 
         # download videos (and recompress)
         if not self.skip_download:
@@ -269,11 +278,57 @@ class Nautilus(object):
         if self.about:
             handle_user_provided_file(
                 source=self.about, dest=self.build_dir / "about.html"
+            
             )
+    
+    def check_description_length(self):
+        # Checking if the provided input is a file or text
+        if os.path.isfile(os.path.join(os.getcwd(), self.description)):
+            with open(os.path.join(os.getcwd(), self.description), "r", encoding="utf-8") as fp:
+                text=""
+                for line in fp:
+                    line = line.strip()
+                    if len(line) >= 80:
+                        raise ValueError(
+                            f"--The description is greater than 80 characters: {line}"
+                        )
+                    text += line
+                self.description=text
+                
+                   
+                
+        else:
+            if len(self.description) >= 80:
+                raise ValueError(
+                    f"--The description is greater than 80 characters: {self.description}"
+                )
+    def check_long_description_length(self):
+        # Checking if the provided input is a file or text
+        if os.path.isfile(os.path.join(os.getcwd(), self.long_description)):
+            with open(os.path.join(os.getcwd(), self.long_description), "r", encoding="utf-8") as fp:
+                text=""
+                for line in fp:
+                    line = line.strip()
+                    if len(line) >= 4000:
+                        raise ValueError(
+                            f"--The description is greater than 80 characters: {line}"
+                        )
+                    text += line
+                self.long_description=text
+                
+                   
+        # checking if length is greater than 4000 characters as per openzim Metadata Specification         
+        else:
+            if len(self.long_description) >= 4000:
+                raise ValueError(
+                    f"--The long description is greater than 4000 characters: {self.long_description}"
+                )
+
 
     def update_metadata(self):
         self.title = self.title or self.name
         self.description = self.description or "-"
+        self.long_description=self.long_description or "..."
         self.creator = self.creator or "Unknown"
         self.publisher = self.publisher or "Kiwix"
 
@@ -288,6 +343,7 @@ class Nautilus(object):
         self.zim_info.update({
             "title": self.title,
             "description": self.description,
+            "long_description":self.long_description,
             "creator": self.creator,
             "publisher": self.publisher,
             "name": self.name,
@@ -303,7 +359,7 @@ class Nautilus(object):
         self.secondary_color = self.secondary_color or secondary_color
 
         # get about content from param, archive or defaults to desc
-        self.about_content = f"<p>{self.description}</p>"
+        self.about_content = f"<p>{self.description}</p><br><p>{self.long_description}</p>"
         about_source = self.build_dir / "about.html"
         if about_source.exists():
             with open(about_source, "r") as fh:
@@ -356,6 +412,7 @@ class Nautilus(object):
             debug=str(self.debug).lower(),
             title=self.title,
             description=self.description,
+            long_description=self.long_description,
             main_color=self.main_color,
             secondary_color=self.secondary_color,
             db_name=f"{self.name}_{self.period}_{uuid.uuid4().hex}_db",
@@ -381,6 +438,7 @@ class Nautilus(object):
             debug=str(self.debug).lower(),
             title=self.title,
             description=self.description,
+            long_description=self.long_description,
             db_name=f"{self.name}_{self.period}_{uuid.uuid4().hex}_db",
             db_version=1,
             nb_items_per_page=self.nb_items_per_page,
@@ -409,3 +467,4 @@ class Nautilus(object):
                     )
                 )
             fp.write("];\n")
+
