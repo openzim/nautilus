@@ -311,7 +311,7 @@ class Nautilus(object):
                     line = line.strip()
                     if len(line) >= 4000:
                         raise ValueError(
-                            f"--The description is greater than 80 characters: {line}"
+                            f"--The long description is greater than 4000 characters: {line}"
                         )
                     text += line
                 self.long_description=text
