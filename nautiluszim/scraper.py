@@ -468,6 +468,7 @@ class Nautilus(object):
                                 "_id": str(docid).zfill(5),
                                 "ti": document.get("title") or "Unknown?",
                                 "dsc": document.get("description") or "",
+                                "longdsc": document.get("long-description") or "",
                                 "aut": document.get("authors") or "",
                                 "fp": document.get("files", []),
                             }
