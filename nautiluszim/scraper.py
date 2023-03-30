@@ -304,27 +304,31 @@ class Nautilus(object):
                 )
 
     def check_long_description_length(self):
-        # Checking if the provided input is a file or text
-        if os.path.isfile(os.path.join(os.getcwd(), self.long_description)):
-            with open(
-                os.path.join(os.getcwd(), self.long_description), "r", encoding="utf-8"
-            ) as fp:
-                text = ""
-                for line in fp:
-                    line = line.strip()
-                    if len(line) >= 4000:
-                        raise ValueError(
-                            f"--The description is greater than 80 characters: {line}"
-                        )
-                    text += line
-                self.long_description = text
+        # checking that user has provided a long description
+        if self.long_description is not None:
+            # Checking if the provided input is a file or text
+            if os.path.isfile(os.path.join(os.getcwd(), self.long_description)):
+                with open(
+                    os.path.join(os.getcwd(), self.long_description),
+                    "r",
+                    encoding="utf-8",
+                ) as fp:
+                    text = ""
+                    for line in fp:
+                        line = line.strip()
+                        if len(line) >= 4000:
+                            raise ValueError(
+                                f"--The description is greater than 80 characters: {line}"
+                            )
+                        text += line
+                    self.long_description = text
 
-        # checking if length is greater than 4000 characters as per openzim Metadata Specification
-        else:
-            if len(self.long_description) >= 4000:
-                raise ValueError(
-                    f"--The long description is greater than 4000 characters: {self.long_description}"
-                )
+            # checking if length is greater than 4000 characters as per openzim Metadata Specification
+            else:
+                if len(self.long_description) >= 4000:
+                    raise ValueError(
+                        f"--The long description is greater than 4000 characters: {self.long_description}"
+                    )
 
     def update_metadata(self):
         self.title = self.title or self.name
