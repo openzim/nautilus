@@ -286,12 +286,12 @@ class Nautilus(object):
     def check_description_length(self):
         if len(self.description) > MAXIMUM_DESCRIPTION_METADATA_LENGTH:
                 raise ValueError(
-                    f"--The description is greater than 80 characters: {len(self.description)} characters"
+                    f"--The description is greater than {MAXIMUM_DESCRIPTION_METADATA_LENGTH} characters: {len(self.description)} characters"
                 )
         if (self.long_description is not None):
             if len(self.long_description) > MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH:
                     raise ValueError(
-                        f"--The Long Description is greater than 4000 characters: {len(self.long_description)} characters"
+                        f"--The Long Description is greater than {MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH} characters: {len(self.long_description)} characters"
                     )
 
             
