@@ -19,7 +19,12 @@ from zimscraperlib.zim.filesystem import make_zim_file
 from zimscraperlib.fix_ogvjs_dist import fix_source_dir
 from zimscraperlib.inputs import handle_user_provided_file
 from zimscraperlib.i18n import setlocale, get_language_details, _
-from zimscraperlib.imaging import resize_image, get_colors, is_hex_color, create_favicon
+from zimscraperlib.image.probing import get_colors,is_hex_color
+from zimscraperlib.image.convertion import create_favicon
+from zimscraperlib.image.transformation import resize_image
+from zimscraperlib.constants import MAXIMUM_DESCRIPTION_METADATA_LENGTH,MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH
+
+
 
 from .constants import ROOT_DIR, SCRAPER, getLogger
 
@@ -157,7 +162,6 @@ class Nautilus(object):
     def run(self):
         """ execute the scrapper step by step """
 
-        # fail early if description length is greater than 80 characters
         self.check_description_length()
 
         logger.info(f"starting nautilus scraper for {self.archive}")
@@ -280,11 +284,16 @@ class Nautilus(object):
             )
 
     def check_description_length(self):
-        # Checking if the provided input is a greater than 80 characters
-        if len(self.description) >= 80:
+        if len(self.description) > MAXIMUM_DESCRIPTION_METADATA_LENGTH:
                 raise ValueError(
-                    f"--The description is greater than 80 characters: {self.description}"
+                    f"--The description is greater than 80 characters: {len(self.description)} characters"
                 )
+        if (self.long_description is not None):
+            if len(self.long_description) > MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH:
+                    raise ValueError(
+                        f"--The Long Description is greater than 4000 characters: {len(self.long_description)} characters"
+                    )
+
             
 
     def update_metadata(self):
@@ -323,15 +332,7 @@ class Nautilus(object):
         # get about content from param, archive or defaults to desc
 
         #setting the about_content to long_description if it is provided by the user
-        if(self.long_description is not None):
-            self.about_content = (
-                f"<p>{self.long_description}</p>"
-            )
-        #setting the about_content to description if long_description is not provided
-        else:
-            self.about_content = (
-                f"<p>{self.description}</p>"
-            )
+        self.about_content = f"<p>{self.long_description or self.description}</p>"
         about_source = self.build_dir / "about.html"
         if about_source.exists():
             with open(about_source, "r") as fh:
@@ -410,7 +411,6 @@ class Nautilus(object):
             debug=str(self.debug).lower(),
             title=self.title,
             description=self.description,
-            long_description=self.long_description,
             db_name=f"{self.name}_{self.period}_{uuid.uuid4().hex}_db",
             db_version=1,
             nb_items_per_page=self.nb_items_per_page,

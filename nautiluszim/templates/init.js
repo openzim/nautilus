@@ -3,7 +3,6 @@ $( document ).ready(function() {
     window.nautilus = new Nautilus({
         title: "{{ title|safe }}",
         description: "{{ description|safe }}",
-        long_description: "{{ long_description|safe }}",
         database_name: "{{ db_name }}.{{ db_version }}",
         database_version: "{{ db_version }}",
         nb_items_per_page: {{ nb_items_per_page }},
