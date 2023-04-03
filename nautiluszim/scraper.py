@@ -19,7 +19,12 @@ from zimscraperlib.zim.filesystem import make_zim_file
 from zimscraperlib.fix_ogvjs_dist import fix_source_dir
 from zimscraperlib.inputs import handle_user_provided_file
 from zimscraperlib.i18n import setlocale, get_language_details, _
-from zimscraperlib.imaging import resize_image, get_colors, is_hex_color, create_favicon
+from zimscraperlib.image.probing import get_colors,is_hex_color
+from zimscraperlib.image.convertion import create_favicon
+from zimscraperlib.image.transformation import resize_image
+from zimscraperlib.constants import MAXIMUM_DESCRIPTION_METADATA_LENGTH,MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH
+
+
 
 from .constants import ROOT_DIR, SCRAPER, getLogger
 
@@ -46,6 +51,7 @@ class Nautilus(object):
         name=None,
         title=None,
         description=None,
+        longdescription=None,
         creator=None,
         publisher=None,
         favicon=None,
@@ -66,6 +72,7 @@ class Nautilus(object):
         self.tags = [t.strip() for t in tags.split(",")]
         self.title = title
         self.description = description
+        self.long_description = longdescription
         self.creator = creator
         self.publisher = publisher
         self.name = name
@@ -95,6 +102,7 @@ class Nautilus(object):
             tags=tags,
             title=title,
             description=description,
+            long_description=longdescription,
             creator=creator,
             publisher=publisher,
             name=name,
@@ -153,6 +161,9 @@ class Nautilus(object):
 
     def run(self):
         """ execute the scrapper step by step """
+
+        self.check_description_length()
+
         logger.info(f"starting nautilus scraper for {self.archive}")
 
         logger.info("preparing build folder at {}".format(self.build_dir.resolve()))
@@ -188,9 +199,10 @@ class Nautilus(object):
                 build_dir=self.build_dir,
                 fpath=self.output_dir / self.fname,
                 main_page="home.html",
-                favicon="favicon.png",
+                illustration="favicon.png",
                 date=datetime.date.today(),
-                **self.zim_info)
+                **self.zim_info,
+            )
             logger.info("removing HTML folder")
             if not self.keep_build_dir:
                 shutil.rmtree(self.build_dir, ignore_errors=True)
@@ -271,9 +283,22 @@ class Nautilus(object):
                 source=self.about, dest=self.build_dir / "about.html"
             )
 
+    def check_description_length(self):
+        if len(self.description) > MAXIMUM_DESCRIPTION_METADATA_LENGTH:
+                raise ValueError(
+                    f"--The description is greater than {MAXIMUM_DESCRIPTION_METADATA_LENGTH} characters: {len(self.description)} characters"
+                )
+        if (self.long_description is not None):
+            if len(self.long_description) > MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH:
+                    raise ValueError(
+                        f"--The Long Description is greater than {MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH} characters: {len(self.long_description)} characters"
+                    )
+
+            
+
     def update_metadata(self):
         self.title = self.title or self.name
-        self.description = self.description or "-"
+        self.long_description = self.long_description
         self.creator = self.creator or "Unknown"
         self.publisher = self.publisher or "Kiwix"
 
@@ -285,13 +310,15 @@ class Nautilus(object):
             self.build_dir.joinpath("favicon.ico"),
         )
 
-        self.zim_info.update({
-            "title": self.title,
-            "description": self.description,
-            "creator": self.creator,
-            "publisher": self.publisher,
-            "name": self.name,
-            "tags": self.tags,
+        self.zim_info.update(
+            {
+                "title": self.title,
+                "description": self.description,
+                "long_description": self.long_description,
+                "creator": self.creator,
+                "publisher": self.publisher,
+                "name": self.name,
+                "tags": self.tags,
             }
         )
 
@@ -303,7 +330,9 @@ class Nautilus(object):
         self.secondary_color = self.secondary_color or secondary_color
 
         # get about content from param, archive or defaults to desc
-        self.about_content = f"<p>{self.description}</p>"
+
+        #setting the about_content to long_description if it is provided by the user
+        self.about_content = f"<p>{self.long_description or self.description}</p>"
         about_source = self.build_dir / "about.html"
         if about_source.exists():
             with open(about_source, "r") as fh:
@@ -356,6 +385,7 @@ class Nautilus(object):
             debug=str(self.debug).lower(),
             title=self.title,
             description=self.description,
+            long_description=self.long_description,
             main_color=self.main_color,
             secondary_color=self.secondary_color,
             db_name=f"{self.name}_{self.period}_{uuid.uuid4().hex}_db",
