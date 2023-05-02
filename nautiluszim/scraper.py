@@ -377,6 +377,20 @@ class Nautilus(object):
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
+        missing_files = []
+        for entry in self.json_collection:
+            if not entry.get("files"):
+                continue
+            for relative_path in entry["files"]:
+                if not self.files_path.joinpath(relative_path).exists():
+                    missing_files.append(relative_path)
+
+        if missing_files:
+            raise ValueError(
+                "File(s) referenced in collection but missing:\n - "
+                + "\n - ".join(missing_files)
+            )
+
     def make_html_files(self):
         """make up HTML structure to read the content"""
 
