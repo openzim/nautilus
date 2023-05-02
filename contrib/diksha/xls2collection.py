@@ -2,20 +2,19 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
-import os
-import re
-import sys
 import json
+import os
 import pathlib
+import re
 import subprocess
+import sys
 from contextlib import contextmanager
 
 import gdown
-from slugify import slugify
 from openpyxl import load_workbook
-from zimscraperlib.video.presets import VideoWebmHigh
+from slugify import slugify
 from zimscraperlib.video.encoding import reencode
-
+from zimscraperlib.video.presets import VideoWebmHigh
 
 DATA_DIR = pathlib.Path("data").resolve()
 FILENAMES_MAP_PATH = pathlib.Path("filenames.map")

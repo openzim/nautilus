@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
-import sys
-import pathlib
-import logging
 import argparse
+import logging
+import pathlib
 import subprocess
+import sys
 
 import humanfriendly
 

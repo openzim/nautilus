@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
-import os
-import sys
-import shutil
-import pprint
-import zipfile
-import pathlib
-import logging
 import argparse
+import logging
+import os
+import pathlib
+import pprint
+import shutil
 import subprocess
+import sys
+import zipfile
 
 import humanfriendly
 
@@ -210,7 +210,8 @@ class Compressor:
                 # constrain quality to not exceed this bitrate
                 "-maxrate",
                 "300k",
-                # decoder buffer size, which determines the variability of the output bitrate
+                # decoder buffer size, which determines the variability
+                # of the output bitrate
                 "-bufsize",
                 "1000k",
                 # nb of threads to use
@@ -246,7 +247,8 @@ class Compressor:
                 "128k",
                 # scale to 240p 4:3, adding bars if necessary
                 "-vf",
-                "scale=426:240:force_original_aspect_ratio=decrease,pad=426:240:(ow-iw)/2:(oh-ih)/2",
+                "scale=426:240:force_original_aspect_ratio=decrease,"
+                "pad=426:240:(ow-iw)/2:(oh-ih)/2",
                 "-codec:a",
                 audio_codecs[video_format],
                 # constant bitrate
@@ -273,7 +275,8 @@ class Compressor:
                 "192k",
                 # scale to 360p 4:3, adding bars if necessary
                 "-vf",
-                "scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2",
+                "scale=640:360:force_original_aspect_ratio=decrease,"
+                "pad=640:360:(ow-iw)/2:(oh-ih)/2",
                 "-codec:a",
                 audio_codecs[video_format],
                 # constant bitrate
@@ -300,7 +303,8 @@ class Compressor:
                 "384k",
                 # scale to 360p 4:3, adding bars if necessary
                 "-vf",
-                "scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2",
+                "scale=640:360:force_original_aspect_ratio=decrease,"
+                "pad=640:360:(ow-iw)/2:(oh-ih)/2",
                 "-codec:a",
                 audio_codecs[video_format],
                 # constant bitrate
@@ -427,7 +431,8 @@ class Compressor:
             dst_size = self.dst_path.stat().st_size
             diff_size = (1 - (dst_size / src_size)) * 100
             logger.info(
-                f"{self.src_path}: {hsize(src_size)} -> {hsize(dst_size)} ({diff_size:.1f}%)"
+                f"{self.src_path}: {hsize(src_size)} -> {hsize(dst_size)} "
+                f"({diff_size:.1f}%)"
             )
             return 0
 
@@ -486,7 +491,8 @@ def main():
     for key in PRESETS.keys():
         parser.add_argument(
             f"--{key}-preset",
-            help=f"Preset to use for {key.upper()} files. Change default via {key.upper()}_PRESET environ",
+            help=f"Preset to use for {key.upper()} files. "
+            f"Change default via {key.upper()}_PRESET environ",
             required=False,
             dest=f"{key}_preset",
             default=PRESETS[key],
