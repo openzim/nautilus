@@ -10,7 +10,7 @@ jobs:
   check-qa:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/2checkout@v3
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v3
         with:
