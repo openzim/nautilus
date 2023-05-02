@@ -64,7 +64,10 @@ def main():
     )
 
     parser.add_argument(
-        "--src", help="Source file path", required=True, dest="src_path",
+        "--src",
+        help="Source file path",
+        required=True,
+        dest="src_path",
     )
     parser.add_argument(
         "--dst",

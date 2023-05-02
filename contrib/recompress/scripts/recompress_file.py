@@ -436,7 +436,6 @@ class Compressor:
 
 
 def main():
-
     parser = argparse.ArgumentParser(
         prog="nautilus file recompressor",
         description="recompress a file for smaller size use in nautilus",
@@ -444,7 +443,10 @@ def main():
     )
 
     parser.add_argument(
-        "--src", help="Source file path", required=True, dest="src_path",
+        "--src",
+        help="Source file path",
+        required=True,
+        dest="src_path",
     )
     parser.add_argument(
         "--dst",

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
-import pathlib
 import logging
+import pathlib
 
 from zimscraperlib.logging import getLogger as lib_getLogger
 
@@ -15,15 +15,16 @@ with open(ROOT_DIR.joinpath("VERSION"), "r") as fh:
 
 SCRAPER = f"{NAME} {VERSION}"
 
+
 class Global:
     debug = False
 
 
 def setDebug(debug):
-    """ toggle constants global DEBUG flag (used by getLogger) """
+    """toggle constants global DEBUG flag (used by getLogger)"""
     Global.debug = bool(debug)
 
 
 def getLogger():
-    """ configured logger respecting DEBUG flag """
+    """configured logger respecting DEBUG flag"""
     return lib_getLogger(NAME, level=logging.DEBUG if Global.debug else logging.INFO)

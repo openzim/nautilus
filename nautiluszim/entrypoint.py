@@ -9,7 +9,8 @@ from .constants import NAME, SCRAPER, getLogger, setDebug
 
 def main():
     parser = argparse.ArgumentParser(
-        prog=NAME, description="Create a ZIM file off a collection of file documents",
+        prog=NAME,
+        description="Create a ZIM file off a collection of file documents",
     )
 
     parser.add_argument(
@@ -19,7 +20,8 @@ def main():
     )
     parser.add_argument(
         "--collection",
-        help="Different collection JSON path or URL. Otherwise using `collection.json` from archive",
+        help="Different collection JSON path or URL. "
+        "Otherwise using `collection.json` from archive",
         required=False,
     )
     parser.add_argument(
@@ -93,27 +95,32 @@ def main():
     )
     parser.add_argument(
         "--locale",
-        help="Locale name to use for translations (if avail) and time representations. Defaults to --language or English.",
+        help="Locale name to use for translations (if avail) and time representations. "
+        "Defaults to --language or English.",
         dest="locale_name",
     )
     parser.add_argument(
-        "--tags", help="List of comma-separated Tags for the ZIM file.", default="",
+        "--tags",
+        help="List of comma-separated Tags for the ZIM file.",
+        default="",
     )
     parser.add_argument(
-        "--title", help="Title for your project and ZIM. Otherwise --name.",
+        "--title",
+        help="Title for your project and ZIM. Otherwise --name.",
     )
     parser.add_argument(
-        "--description", 
+        "--description",
         help="Description for your project and ZIM.",
         required=True,
     )
     parser.add_argument(
-        "--longdescription", 
+        "--longdescription",
         help="Long Description for your project and ZIM.",
     )
 
     parser.add_argument(
-        "--creator", help="Name of content creator.",
+        "--creator",
+        help="Name of content creator.",
     )
     parser.add_argument(
         "--publisher", help="Custom publisher name (ZIM metadata)", default="Kiwix"
@@ -134,16 +141,19 @@ def main():
     )
     parser.add_argument(
         "--main-color",
-        help="Custom header color. Hex/HTML syntax (#DEDEDE). Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
+        help="Custom header color. Hex/HTML syntax (#DEDEDE). "
+        "Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
     )
     parser.add_argument(
         "--secondary-color",
-        help="Custom secondary color. Hex/HTML syntax (#DEDEDE). Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
+        help="Custom secondary color. Hex/HTML syntax (#DEDEDE). "
+        "Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
     )
 
     parser.add_argument(
         "--about",
-        help="Custom about HTML file. Uses file `about.html` of archive if present otherwise.",
+        help="Custom about HTML file. "
+        "Uses file `about.html` of archive if present otherwise.",
     )
 
     parser.add_argument(

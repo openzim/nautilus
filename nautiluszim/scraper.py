@@ -2,29 +2,30 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
-import os
-import uuid
+import datetime
 import json
 import locale
-import shutil
+import os
 import pathlib
-import datetime
+import shutil
 import subprocess
+import uuid
 from pathlib import Path
 
 import jinja2
-from zimscraperlib.logging import nicer_args_join
+from zimscraperlib.constants import (
+    MAXIMUM_DESCRIPTION_METADATA_LENGTH,
+    MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH,
+)
 from zimscraperlib.download import save_large_file
-from zimscraperlib.zim.filesystem import make_zim_file
 from zimscraperlib.fix_ogvjs_dist import fix_source_dir
-from zimscraperlib.inputs import handle_user_provided_file
-from zimscraperlib.i18n import setlocale, get_language_details, _
-from zimscraperlib.image.probing import get_colors,is_hex_color
+from zimscraperlib.i18n import _, get_language_details, setlocale
 from zimscraperlib.image.convertion import create_favicon
+from zimscraperlib.image.probing import get_colors, is_hex_color
 from zimscraperlib.image.transformation import resize_image
-from zimscraperlib.constants import MAXIMUM_DESCRIPTION_METADATA_LENGTH,MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH
-
-
+from zimscraperlib.inputs import handle_user_provided_file
+from zimscraperlib.logging import nicer_args_join
+from zimscraperlib.zim.filesystem import make_zim_file
 
 from .constants import ROOT_DIR, SCRAPER, getLogger
 
@@ -115,7 +116,8 @@ class Nautilus(object):
             self.locale = setlocale(ROOT_DIR, locale_name)
         except locale.Error:
             logger.error(
-                f"No locale for {locale_name}. Use --locale to specify it. defaulting to en_US"
+                f"No locale for {locale_name}. Use --locale to specify it. "
+                "defaulting to en_US"
             )
             self.locale = setlocale(ROOT_DIR, "en")
 
@@ -160,7 +162,7 @@ class Nautilus(object):
         return self.build_dir.joinpath("files")
 
     def run(self):
-        """ execute the scrapper step by step """
+        """execute the scrapper step by step"""
 
         self.check_description_length()
 
@@ -210,7 +212,7 @@ class Nautilus(object):
         logger.info("all done!")
 
     def make_build_folder(self):
-        """ prepare build folder before we start downloading data """
+        """prepare build folder before we start downloading data"""
 
         # create build folder
         os.makedirs(self.build_dir, exist_ok=True)
@@ -234,10 +236,10 @@ class Nautilus(object):
         os.makedirs(self.files_path, exist_ok=True)
 
     def check_branding_values(self):
-        """ checks that user-supplied images and colors are valid (so to fail early)
+        """checks that user-supplied images and colors are valid (so to fail early)
 
-            Images are checked for existence or downloaded then resized
-            Colors are check for validity """
+        Images are checked for existence or downloaded then resized
+        Colors are check for validity"""
 
         # skip this step if none of related values were supplied
         if not sum(
@@ -275,7 +277,8 @@ class Nautilus(object):
 
         if self.secondary_color and not is_hex_color(self.secondary_color):
             raise ValueError(
-                f"--secondary_color-color is not a valid hex color: {self.secondary_color}"
+                "--secondary_color-color is not a valid hex color: "
+                f"{self.secondary_color}"
             )
 
         if self.about:
@@ -285,16 +288,18 @@ class Nautilus(object):
 
     def check_description_length(self):
         if len(self.description) > MAXIMUM_DESCRIPTION_METADATA_LENGTH:
-                raise ValueError(
-                    f"--The description is greater than {MAXIMUM_DESCRIPTION_METADATA_LENGTH} characters: {len(self.description)} characters"
-                )
-        if (self.long_description is not None):
+            raise ValueError(
+                "--The description is greater "
+                f"than {MAXIMUM_DESCRIPTION_METADATA_LENGTH} characters: "
+                f"{len(self.description)} characters"
+            )
+        if self.long_description is not None:
             if len(self.long_description) > MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH:
-                    raise ValueError(
-                        f"--The Long Description is greater than {MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH} characters: {len(self.long_description)} characters"
-                    )
-
-            
+                raise ValueError(
+                    "--The Long Description is greater "
+                    f"than {MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH} characters: "
+                    f"{len(self.long_description)} characters"
+                )
 
     def update_metadata(self):
         self.title = self.title or self.name
@@ -331,7 +336,7 @@ class Nautilus(object):
 
         # get about content from param, archive or defaults to desc
 
-        #setting the about_content to long_description if it is provided by the user
+        # setting the about_content to long_description if it is provided by the user
         self.about_content = f"<p>{self.long_description or self.description}</p>"
         about_source = self.build_dir / "about.html"
         if about_source.exists():
@@ -373,8 +378,7 @@ class Nautilus(object):
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
     def make_html_files(self):
-        """ make up HTML structure to read the content
-        """
+        """make up HTML structure to read the content"""
 
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(str(self.templates_dir)), autoescape=True
