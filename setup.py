@@ -15,24 +15,24 @@ def read(*names, **kwargs):
         return fh.read()
 
 
-print("Downloading and fixing JS dependencies...")
-subprocess.run([str(root_dir.joinpath("get_js_deps.sh").resolve())], check=True)
+if not root_dir.joinpath(
+    "nautiluszim/templates/vendors", "handlebars.runtime.min-v4.7.7.js"
+).exists():
+    print("Downloading and fixing JS dependencies...")
+    subprocess.run([str(root_dir.joinpath("get_js_deps.sh").resolve())], check=True)
 
-print("Compile handlebars templates")
-subprocess.run(
-    [
-        "/usr/bin/env",
-        "handlebars",
-        str(root_dir / "nautiluszim" / "templates"),
-        "-f",
-        str(
-            root_dir.joinpath(
-                "nautiluszim", "templates", "assets", "templates", "precompiled.js"
-            )
-        ),
-    ],
-    check=True,
-)
+if not root_dir.joinpath("nautiluszim/templates/precompiled.js").exists():
+    print("Compile handlebars templates")
+    subprocess.run(
+        [
+            "/usr/bin/env",
+            "handlebars",
+            str(root_dir / "nautiluszim" / "templates"),
+            "-f",
+            str(root_dir.joinpath("nautiluszim", "templates", "precompiled.js")),
+        ],
+        check=True,
+    )
 
 
 setup(
@@ -56,13 +56,15 @@ setup(
     include_package_data=True,
     entry_points={"console_scripts": ["nautiluszim=nautiluszim.__main__:main"]},
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )

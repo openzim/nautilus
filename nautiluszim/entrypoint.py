@@ -60,12 +60,7 @@ def main():
         default="/output",
         dest="output_dir",
     )
-    parser.add_argument(
-        "--no-zim",
-        help="Don't produce a ZIM file, create HTML folder only.",
-        action="store_true",
-        default=False,
-    )
+
     parser.add_argument(
         "--zim-file",
         help="ZIM file name (based on --name if not provided)",
@@ -82,21 +77,17 @@ def main():
         action="store_true",
         dest="keep_build_dir",
     )
-    parser.add_argument(
-        "--skip-download",
-        help="Skip the download and extract step",
-        default=False,
-        action="store_true",
-        dest="skip_download",
-    )
 
     parser.add_argument(
-        "--language", help="ISO-639-3 (3 chars) language code of content", default="eng"
+        "--language",
+        help="ISO-639-3 (3 chars) language code of content. "
+        "comma-separated if multiple ones",
+        default="eng",
     )
     parser.add_argument(
         "--locale",
         help="Locale name to use for translations (if avail) and time representations. "
-        "Defaults to --language or English.",
+        "Defaults to (first) --language or English.",
         dest="locale_name",
     )
     parser.add_argument(
@@ -127,7 +118,8 @@ def main():
     )
     parser.add_argument(
         "--favicon",
-        help="Custom favicon. Will be resized to 48x48px. Nautilus otherwise.",
+        help="Custom favicon. Will be resized to 48x48px. Nautilus one otherwise. "
+        "Also used as ZIM illustration",
     )
     parser.add_argument(
         "--main-logo",

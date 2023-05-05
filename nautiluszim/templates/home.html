@@ -7,7 +7,7 @@
     <link id="favicon" rel="icon" href="favicon.png" type="image/png" />
     <link rel="stylesheet" href="vendors/bootstrap/css/bootstrap.min.css">
     <link href="vendors/videojs/video-js.css" rel="stylesheet" />
-    <link href="assets/styles.css" rel="stylesheet" type="text/css">
+    <link href="styles.css" rel="stylesheet" type="text/css">
     <style type="text/css">
         header { background-color: {{ main_color }};}
         #loader { color: {{ main_color }};}
@@ -18,9 +18,9 @@
     <header class="container-fluid">
         <div class="row">
             <div class="col-xs-12 col-sm-6">
-                <a href="home.html"><img class="logo" src="assets/main-logo.png" /></a>
+                <a href="home.html"><img class="logo" src="main-logo.png" /></a>
                 <a href="#" class="btn about-btn" role="button" data-toggle="tooltip" title="{{ about_label }}">
-                    <img src="assets/info-circle-solid.svg" />
+                    <img src="info-circle-solid.svg" />
                 </a>
             </div>
             <form class="form-check-inline search-box col-xs-12 col-sm-6">
@@ -58,7 +58,7 @@
         title="{{ backtotop_label }}">⇡</span>
     </a>
     <footer>
-        {% if secondary_logo %}<hr /><img src="assets/secondary-logo.png" />{% endif %}
+        {% if secondary_logo %}<hr /><img src="secondary-logo.png" />{% endif %}
     </footer>
 
     <script src="vendors/pouchdb.min.js"></script>
@@ -75,13 +75,13 @@
     <script src="vendors/videojs-ogvjs.js"></script>
 
     <script src="vendors/handlebars.runtime.min-v4.7.7.js"></script>
-    <script src="assets/templates/precompiled.js"></script>
+    <script src="precompiled.js"></script>
     <script src="vendors/sugar.min.js"></script>
     <script src="nautilus.js"></script>
     <script src="init.js"></script>
     <div id="about-content">
         {{about_content|safe}}
-        {% if secondary_logo %}<hr /><img src="assets/secondary-logo.png" />{% endif %}
+        {% if secondary_logo %}<hr /><img src="secondary-logo.png" />{% endif %}
     </div>
 </body>
 </html>
