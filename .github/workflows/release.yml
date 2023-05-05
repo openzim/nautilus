@@ -26,8 +26,7 @@ jobs:
 
       - name: install handlebars
         run: |
-          npm -g install handlebars
-          npm -g bin >> $GITHUB_PATH
+          npm install -g handlebars
 
       - name: Build sdist and wheel
         run: |
