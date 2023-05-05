@@ -321,7 +321,7 @@ class Nautilus(object):
     ) -> pathlib.Path:
         """extracting single archive member `name` to filesystem at `to`"""
 
-        with zipfile.ZipFile(self.archive, "r") as zh:
+        with zipfile.ZipFile(self.archive_path, "r") as zh:
             try:
                 normalized_name = zh.extract(member=name, path=self.build_dir)
                 return self.build_dir.joinpath(normalized_name)
@@ -338,7 +338,7 @@ class Nautilus(object):
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
-        with zipfile.ZipFile(self.archive, "r") as zh:
+        with zipfile.ZipFile(self.archive_path, "r") as zh:
             all_names = zh.namelist()
 
         missing_files = []
