@@ -431,6 +431,7 @@ var Nautilus = (function() {
     // rando::   random-{modalId}-{id}.{id}.{id}
     // search::  search-{modalId}-{cursor}_{text}
     // list::    list-{modalId}-{cursor}
+    let parent = this;
 
     if (ident === undefined)
       ident = this.ident;
@@ -448,7 +449,7 @@ var Nautilus = (function() {
       documentIds = options.trim().split(".")
         .map(function (sid) { return parseInt(sid); })
         .filter(function (id) { return !isNaN(id)})
-        .map(function (id) { return id.toString();});
+        .map(function (id) { return parent.zfill(id.toString());});
     }
 
     if (kind == "search") {
@@ -571,6 +572,10 @@ var Nautilus = (function() {
     });
   };
 
+  Nautilus.prototype.zfill = function(number) {
+    return ('0000' + number).slice(-5);
+  };
+
   Nautilus.prototype.getRandomDocuments = function (on_complete) {
     var _this = this;
     function getRandomInt(max) {
@@ -580,7 +585,7 @@ var Nautilus = (function() {
     _this.console.log("getRandomDocuments", this.doc_count, this.options.nb_items_per_page);
     let seq_ids = [];
     for (var i=0; i<this.options.nb_items_per_page;i++) {
-      seq_ids.push(getRandomInt(this.doc_count).toString());
+      seq_ids.push(this.zfill(getRandomInt(this.doc_count).toString()));
     }
     this.getRequestedDocuments("random", seq_ids, on_complete);
   };

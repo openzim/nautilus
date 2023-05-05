@@ -25,11 +25,7 @@ subprocess.run(
         "handlebars",
         str(root_dir / "nautiluszim" / "templates"),
         "-f",
-        str(
-            root_dir.joinpath(
-                "nautiluszim", "templates", "assets", "templates", "precompiled.js"
-            )
-        ),
+        str(root_dir.joinpath("nautiluszim", "templates", "precompiled.js")),
     ],
     check=True,
 )

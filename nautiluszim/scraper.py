@@ -8,9 +8,11 @@ import locale
 import os
 import pathlib
 import shutil
-import subprocess
+import unicodedata
 import uuid
+import zipfile
 from pathlib import Path
+from typing import Optional
 
 import jinja2
 from zimscraperlib.constants import (
@@ -18,18 +20,21 @@ from zimscraperlib.constants import (
     MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH,
 )
 from zimscraperlib.download import save_large_file
-from zimscraperlib.fix_ogvjs_dist import fix_source_dir
 from zimscraperlib.i18n import _, get_language_details, setlocale
 from zimscraperlib.image.convertion import create_favicon
 from zimscraperlib.image.probing import get_colors, is_hex_color
 from zimscraperlib.image.transformation import resize_image
 from zimscraperlib.inputs import handle_user_provided_file
-from zimscraperlib.logging import nicer_args_join
-from zimscraperlib.zim.filesystem import make_zim_file
+from zimscraperlib.zim.creator import Creator
 
 from .constants import ROOT_DIR, SCRAPER, getLogger
 
 logger = getLogger()
+
+
+def normalized_path(path: str) -> str:
+    """ASCII version of a path for use in URL"""
+    return unicodedata.normalize("NFKC", path)
 
 
 class Nautilus(object):
@@ -41,11 +46,9 @@ class Nautilus(object):
         no_random,
         show_description,
         output_dir,
-        no_zim,
         fname,
         debug,
         keep_build_dir,
-        skip_download,
         language,
         locale_name,
         tags,
@@ -90,28 +93,16 @@ class Nautilus(object):
         self.period = datetime.datetime.now().strftime("%Y-%m")
 
         # debug/devel options
-        self.no_zim = no_zim
         self.debug = debug
         self.keep_build_dir = keep_build_dir
-        self.skip_download = skip_download
 
         self.build_dir = self.output_dir.joinpath("build")
 
-        # store ZIM-related info
-        self.zim_info = dict(
-            language=language,
-            tags=tags,
-            title=title,
-            description=description,
-            long_description=longdescription,
-            creator=creator,
-            publisher=publisher,
-            name=name,
-            scraper=SCRAPER,
-        )
-
         # set and record locale for translations
-        locale_name = locale_name or get_language_details(self.language)["iso-639-1"]
+        locale_name = (
+            locale_name
+            or get_language_details(self.language.split(",")[0])["iso-639-1"]
+        )
         try:
             self.locale = setlocale(ROOT_DIR, locale_name)
         except locale.Error:
@@ -130,36 +121,12 @@ class Nautilus(object):
         return self.root_dir.joinpath("templates")
 
     @property
-    def assets_dir(self):
-        return self.templates_dir.joinpath("assets")
-
-    @property
-    def vendors_src_dir(self):
-        return self.templates_dir.joinpath("vendors")
-
-    @property
-    def vendors_dir(self):
-        return self.build_dir.joinpath("vendors")
-
-    @property
-    def main_logo_path(self):
-        return self.build_dir.joinpath("assets", "main-logo.png")
-
-    @property
-    def secondary_logo_path(self):
-        return self.build_dir.joinpath("assets", "secondary-logo.png")
-
-    @property
     def archive_path(self):
         return (
             self.output_dir.joinpath("archive.zip")
             if self.archive.startswith("http")
             else pathlib.Path(self.archive).expanduser().resolve()
         )
-
-    @property
-    def files_path(self):
-        return self.build_dir.joinpath("files")
 
     def run(self):
         """execute the scrapper step by step"""
@@ -176,38 +143,54 @@ class Nautilus(object):
         # fail early if supplied branding files are missing
         self.check_branding_values()
 
-        # download videos (and recompress)
-        if not self.skip_download:
-            self.download_and_extract_archive()
+        # download archive
+        self.download_archive()
 
         if not self.collection:
-            self.collection = self.files_path.joinpath("collection.json")
+            self.collection = self.extract_to_fs("collection.json")
+            if not self.about:
+                self.extract_to_fs("about.html", failsafe=True)
 
         self.test_collection()
 
         logger.info("update general metadata")
         self.update_metadata()
 
-        logger.info("creating HTML files")
-        self.make_html_files()
+        # prepare creator
+        self.zim_creator = Creator(
+            filename=self.output_dir / self.fname,
+            main_path="home",
+            ignore_duplicates=True,
+        ).config_verbose(self.debug)
 
-        # make zim file
-        if not self.no_zim:
-            self.fname = Path(
-                self.fname if self.fname else f"{self.name}_{self.period}.zim"
+        with open(self.build_dir.joinpath("favicon.png"), "rb") as fh:
+            self.zim_creator.config_metadata(
+                Name=self.name,
+                Language=self.language,
+                Title=self.title,
+                Description=self.description,
+                LongDescription=self.long_description,
+                Creator=self.creator,
+                Publisher=self.publisher,
+                Date=datetime.date.today(),
+                Illustration_48x48_at_1=fh.read(),
+                Tags=";".join(self.tags),
+                Scraper=SCRAPER,
             )
-            logger.info("building ZIM file")
-            make_zim_file(
-                build_dir=self.build_dir,
-                fpath=self.output_dir / self.fname,
-                main_page="home.html",
-                illustration="favicon.png",
-                date=datetime.date.today(),
-                **self.zim_info,
-            )
-            logger.info("removing HTML folder")
-            if not self.keep_build_dir:
-                shutil.rmtree(self.build_dir, ignore_errors=True)
+        self.zim_creator.start()
+
+        logger.info("adding U.I")
+        self.add_ui()
+
+        logger.info("Adding all files")
+        self.process_collection_entries()
+
+        logger.info("Finishing ZIM file")
+        self.zim_creator.finish()
+
+        logger.info("removing HTML folder")
+        if not self.keep_build_dir:
+            shutil.rmtree(self.build_dir, ignore_errors=True)
 
         logger.info("all done!")
 
@@ -216,24 +199,11 @@ class Nautilus(object):
 
         # create build folder
         os.makedirs(self.build_dir, exist_ok=True)
-
-        # copy vendors and assets
-        for folder in ["vendors", "assets"]:
-            target = self.build_dir.joinpath(folder)
-            if target.exists():
-                shutil.rmtree(target)
-            shutil.copytree(self.templates_dir.joinpath(folder), target)
-
-        fix_source_dir(self.build_dir.joinpath("vendors"))
-
-        for fname in ["nautilus.js", "favicon.png"]:
-            target = self.build_dir.joinpath(fname)
-            try:
-                target.unlink()
-            except FileNotFoundError:
-                pass
-            shutil.copy(self.templates_dir.joinpath(fname), target)
-        os.makedirs(self.files_path, exist_ok=True)
+        for fname in ("favicon.png", "main-logo.png"):
+            shutil.copy2(
+                self.templates_dir.joinpath(fname),
+                self.build_dir.joinpath(fname),
+            )
 
     def check_branding_values(self):
         """checks that user-supplied images and colors are valid (so to fail early)
@@ -261,8 +231,13 @@ class Nautilus(object):
 
         images = [
             (self.favicon, self.build_dir.joinpath("favicon.png"), 48, 48),
-            (self.main_logo, self.main_logo_path, 300, 65),
-            (self.secondary_logo, self.secondary_logo_path, 300, 65),
+            (self.main_logo, self.build_dir.joinpath("main-logo.png"), 300, 65),
+            (
+                self.secondary_logo,
+                self.build_dir.joinpath("secondary-logo.png"),
+                300,
+                65,
+            ),
         ]
 
         for src, dest, width, height in images:
@@ -302,11 +277,12 @@ class Nautilus(object):
                 )
 
     def update_metadata(self):
+        self.fname = Path(
+            self.fname if self.fname else f"{self.name}_{self.period}.zim"
+        )
         self.title = self.title or self.name
-        self.long_description = self.long_description
         self.creator = self.creator or "Unknown"
-        self.publisher = self.publisher or "Kiwix"
-
+        self.publisher = self.publisher or "openZIM"
         self.tags = self.tags or []
 
         # generate ICO favicon (fallback for browsers)
@@ -315,22 +291,12 @@ class Nautilus(object):
             self.build_dir.joinpath("favicon.ico"),
         )
 
-        self.zim_info.update(
-            {
-                "title": self.title,
-                "description": self.description,
-                "long_description": self.long_description,
-                "creator": self.creator,
-                "publisher": self.publisher,
-                "name": self.name,
-                "tags": self.tags,
-            }
-        )
-
         # set colors from images if not supplied
         main_color, secondary_color = "#95A5A6", "#95A5A6"
         if self.main_logo:
-            main_color = secondary_color = get_colors(self.main_logo_path)[1]
+            main_color = secondary_color = get_colors(
+                self.build_dir.joinpath("main-logo.png")
+            )[1]
         self.main_color = self.main_color or main_color
         self.secondary_color = self.secondary_color or secondary_color
 
@@ -343,32 +309,27 @@ class Nautilus(object):
             with open(about_source, "r") as fh:
                 self.about_content = fh.read()
             about_source.unlink(missing_ok=True)
-        else:
-            about_source = about_source.parent / "files" / "about.html"
-            if about_source.exists():
-                with open(about_source, "r") as fh:
-                    self.about_content = fh.read()
-                about_source.unlink(missing_ok=True)
 
-    def download_and_extract_archive(self):
+    def download_archive(self):
         # download if it's a URL
         if self.archive.startswith("http"):
             logger.info(f"Downloading archive at {self.archive}")
             save_large_file(self.archive, self.archive_path)
 
-        # extract ZIP
-        logger.info(f"Extracting ZIP archive {self.archive_path} to {self.files_path}")
-        args = [
-            "unzip",
-            "-u",
-            "-q",
-            "-D",
-            str(self.archive_path),
-            "-d",
-            str(self.files_path),
-        ]
-        logger.debug(nicer_args_join(args))
-        subprocess.run(args, check=True)
+    def extract_to_fs(
+        self, name: str, failsafe: Optional[bool] = False
+    ) -> pathlib.Path:
+        """extracting single archive member `name` to filesystem at `to`"""
+
+        with zipfile.ZipFile(self.archive, "r") as zh:
+            try:
+                normalized_name = zh.extract(member=name, path=self.build_dir)
+                return self.build_dir.joinpath(normalized_name)
+            except Exception as exc:
+                logger.error(f"Unable to extract {name} from archive: {exc}")
+                if failsafe:
+                    return
+                raise exc
 
     def test_collection(self):
         with open(self.collection, "r") as fp:
@@ -377,12 +338,15 @@ class Nautilus(object):
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
+        with zipfile.ZipFile(self.archive, "r") as zh:
+            all_names = zh.namelist()
+
         missing_files = []
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
             for relative_path in entry["files"]:
-                if not self.files_path.joinpath(relative_path).exists():
+                if relative_path not in all_names:
                     missing_files.append(relative_path)
 
         if missing_files:
@@ -391,8 +355,32 @@ class Nautilus(object):
                 + "\n - ".join(missing_files)
             )
 
-    def make_html_files(self):
+    def process_collection_entries(self):
+        for entry in self.json_collection:
+            if not entry.get("files"):
+                continue
+
+            for relative_path in entry["files"]:
+                logger.debug(f"> {relative_path}")
+                self.zim_creator.add_item_for(
+                    path="files/" + normalized_path(relative_path),
+                    fpath=self.extract_to_fs(relative_path),
+                    delete_fpath=True,
+                    is_front=False,
+                )
+
+    def add_ui(self):
         """make up HTML structure to read the content"""
+
+        for fname in (
+            "favicon.ico",
+            "favicon.png",
+            "main-logo.png",
+            "secondary-logo.png",
+        ):
+            fpath = self.build_dir.joinpath(fname)
+            if fpath.exists():
+                self.zim_creator.add_item_for(path=fname, fpath=fpath)
 
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(str(self.templates_dir)), autoescape=True
@@ -422,8 +410,9 @@ class Nautilus(object):
             about_label=_("About this content"),
             about_content=self.about_content,
         )
-        with open(self.build_dir.joinpath("home.html"), "w", encoding="utf-8") as fp:
-            fp.write(html)
+        self.zim_creator.add_item_for(
+            path="home", content=html, mimetype="text/html", is_front=True
+        )
 
         initjs = env.get_template("init.js").render(
             debug=str(self.debug).lower(),
@@ -437,23 +426,41 @@ class Nautilus(object):
             randomize=self.randomize,
             loading_label=_("Loading…"),
         )
-        with open(self.build_dir.joinpath("init.js"), "w", encoding="utf-8") as fp:
-            fp.write(initjs)
+        self.zim_creator.add_item_for(
+            path="init.js",
+            content=initjs,
+            mimetype="text/javascript",
+            is_front=False,
+        )
 
-        with open(self.build_dir.joinpath("database.js"), "w", encoding="utf-8") as fp:
-            fp.write("var DATABASE = [\n")
-            for docid, document in enumerate(self.json_collection):
-                fp.write(
-                    "{},\n".format(
-                        str(
-                            {
-                                "_id": str(docid).zfill(5),
-                                "ti": document.get("title") or "Unknown?",
-                                "dsc": document.get("description") or "",
-                                "aut": document.get("authors") or "",
-                                "fp": document.get("files", []),
-                            }
-                        )
-                    )
+        database_js = "var DATABASE = [\n"
+        for docid, document in enumerate(self.json_collection):
+            database_js += "{},\n".format(
+                str(
+                    {
+                        "_id": str(docid).zfill(5),
+                        "ti": document.get("title") or "Unknown?",
+                        "dsc": document.get("description") or "",
+                        "aut": document.get("authors") or "",
+                        "fp": [
+                            normalized_path(path) for path in document.get("files", [])
+                        ],
+                    }
                 )
-            fp.write("];\n")
+            )
+        database_js += "];\n"
+        self.zim_creator.add_item_for(
+            path="database.js",
+            content=database_js,
+            mimetype="text/javascript",
+            is_front=False,
+        )
+
+        # recursively add all templates's folder
+        for fpath in self.templates_dir.glob("**/*"):
+            if not fpath.is_file():
+                continue
+            path = str(fpath.relative_to(self.templates_dir))
+
+            logger.debug(f"> {path}")
+            self.zim_creator.add_item_for(path=path, fpath=fpath, is_front=False)
