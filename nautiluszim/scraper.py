@@ -9,11 +9,11 @@ import os
 import pathlib
 import shutil
 import unicodedata
-from urllib.parse import urlparse
 import uuid
 import zipfile
 from pathlib import Path
 from typing import Dict, Optional, Union
+from urllib.parse import urlparse
 
 import jinja2
 from zimscraperlib.constants import (
