@@ -9,10 +9,11 @@ import os
 import pathlib
 import shutil
 import unicodedata
+from urllib.parse import urlparse
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional, Union
 
 import jinja2
 from zimscraperlib.constants import (
@@ -345,9 +346,10 @@ class Nautilus(object):
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
-            for relative_path in entry["files"]:
-                if relative_path not in all_names:
-                    missing_files.append(relative_path)
+            for file in entry["files"]:
+                path = self.parse_files(file)["path"]
+                if not path.startswith("http") and path not in all_names:
+                    missing_files.append(path)
 
         if missing_files:
             raise ValueError(
@@ -355,16 +357,45 @@ class Nautilus(object):
                 + "\n - ".join(missing_files)
             )
 
+    def parse_files(self, file: Union[str, Dict[str, str]]):
+        if isinstance(file, str):
+            return {"path": file, "filename": file}
+        archive_member = file.get("archive-member", None)
+        url = file.get("url", None)
+        path = None
+        filename = None
+        if archive_member is None and url is None:
+            raise ValueError("archive_member and url are both missing")
+        if url:
+            path = url
+            filename = os.path.basename(urlparse(url).path)
+        else:
+            path = archive_member
+            filename = archive_member
+        filename = file.get("filename", filename)
+        return {"path": path, "filename": filename}
+
     def process_collection_entries(self):
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
 
-            for relative_path in entry["files"]:
-                logger.debug(f"> {relative_path}")
+            for file in entry["files"]:
+                file_entity = self.parse_files(file)
+                path = file_entity["path"]
+                filename = file_entity["filename"]
+                logger.debug(f"> {path}")
+
+                if path.startswith("http"):
+                    save_location = self.output_dir.joinpath(filename).resolve()
+                    save_large_file(path, save_location)
+                    fpath = save_location
+                else:
+                    fpath = self.extract_to_fs(path)
+
                 self.zim_creator.add_item_for(
-                    path="files/" + normalized_path(relative_path),
-                    fpath=self.extract_to_fs(relative_path),
+                    path="files/" + normalized_path(filename),
+                    fpath=fpath,
                     delete_fpath=True,
                     is_front=False,
                 )
@@ -443,7 +474,8 @@ class Nautilus(object):
                         "dsc": document.get("description") or "",
                         "aut": document.get("authors") or "",
                         "fp": [
-                            normalized_path(path) for path in document.get("files", [])
+                            normalized_path(self.parse_files(file)["filename"])
+                            for file in document.get("files", [])
                         ],
                     }
                 )
