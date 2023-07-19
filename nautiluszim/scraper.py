@@ -145,14 +145,18 @@ class Nautilus(object):
         self.check_branding_values()
 
         # download archive
-        self.download_archive()
+        if self.archive:
+            self.download_archive()
 
         if not self.collection:
             self.collection = self.extract_to_fs("collection.json")
             if not self.about:
                 self.extract_to_fs("about.html", failsafe=True)
 
-        self.test_collection()
+        if self.collection and not self.archive:
+            self.check_archiveless_collection()
+        else:
+            self.test_collection()
 
         logger.info("update general metadata")
         self.update_metadata()
@@ -331,6 +335,57 @@ class Nautilus(object):
                 if failsafe:
                     return
                 raise exc
+
+    def check_archiveless_collection(self):
+        with open(self.collection, "r") as fp:
+            self.json_collection = [i for i in json.load(fp) if i.get("files", [])]
+        nb_items = len(self.json_collection)
+        nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
+        logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
+
+        none_url_files = []
+        missing_files = []
+        all_file_names = []
+        for entry in self.json_collection:
+            if not entry.get("files"):
+                continue
+            for file in entry["files"]:
+                try:
+                    uri, filename = self.get_file_entry_from(file)
+                    all_file_names.append(filename)
+                    if not uri.startswith("http"):
+                        none_url_files.append(filename)
+                except ValueError:
+                    missing_files.append(entry["title"])
+
+        duplicate_file_names = set(
+            [
+                filename
+                for filename in all_file_names
+                if all_file_names.count(filename) > 1
+            ]
+        )
+
+        if none_url_files:
+            raise ValueError(
+                "File(s) referenced in collection are not urls:\n - "
+                + "\n - ".join(none_url_files)
+            )
+
+        if not all_file_names:
+            raise ValueError("Collection is emtpy:\n")
+
+        if missing_files:
+            raise ValueError(
+                "File(s) referenced in collection but missing:\n - "
+                + "\n - ".join(missing_files)
+            )
+
+        if duplicate_file_names:
+            raise ValueError(
+                "Files in collection are duplicate:\n - "
+                + "\n - ".join(duplicate_file_names)
+            )
 
     def test_collection(self):
         with open(self.collection, "r") as fp:
