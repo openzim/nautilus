@@ -40,7 +40,19 @@ At the moment, the JSON file needs to provide the following fields for each item
         "description": "...",
         "authors": "...",
         "files": ["relative/path/to/file"]
-     }
+    },
+    {
+        "title": "...",
+        "description": "...",
+        "authors": "...",
+        "files": [
+            {
+                "archive-member": "01 BOOK for printing .pdf",  // optional, member name inside archive (same as current)
+                "url": "http://books.com/310398120.pdf",  // optional, has precedence over `archive-member`, url to download file from
+                "filename": "My book.pdf",  // optional, filename to use in ZIM, regardless of original one
+            }
+        ]
+    }
 ]
 ```
 
