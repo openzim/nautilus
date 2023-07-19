@@ -8,6 +8,7 @@ import locale
 import os
 import pathlib
 import shutil
+import tempfile
 import unicodedata
 import uuid
 import zipfile
@@ -97,7 +98,6 @@ class Nautilus(object):
         self.keep_build_dir = keep_build_dir
 
         self.build_dir = self.output_dir.joinpath("build")
-        self.tempfiles_dir = self.build_dir.joinpath("build")
 
         # set and record locale for translations
         locale_name = (
@@ -200,7 +200,6 @@ class Nautilus(object):
 
         # create build folder
         os.makedirs(self.build_dir, exist_ok=True)
-        os.makedirs(self.tempfiles_dir, exist_ok=True)
         for fname in ("favicon.png", "main-logo.png"):
             shutil.copy2(
                 self.templates_dir.joinpath(fname),
@@ -344,14 +343,14 @@ class Nautilus(object):
             all_names = zh.namelist()
 
         missing_files = []
-        saved_file_paths = []
+        all_file_paths = []
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
             for file in entry["files"]:
                 try:
-                    path = self.get_file_entry_from(file)[0]
-                    saved_file_paths.append(path)
+                    path, _ = self.get_file_entry_from(file)
+                    all_file_paths.append(path)
                     if not path.startswith("http") and path not in all_names:
                         missing_files.append(path)
                 except ValueError:
@@ -363,7 +362,7 @@ class Nautilus(object):
                 + "\n - ".join(missing_files)
             )
         duplicate_file_paths = [
-            path for path in saved_file_paths if saved_file_paths.count(path) > 1
+            path for path in all_file_paths if all_file_paths.count(path) > 1
         ]
         if duplicate_file_paths:
             raise ValueError(
@@ -371,9 +370,7 @@ class Nautilus(object):
                 + "\n - ".join(duplicate_file_paths)
             )
 
-    def get_file_entry_from(
-        self, file: Union[str, Dict[str, str]]
-    ) -> Tuple[str | None, str | None]:
+    def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> Tuple[str, str]:
         """Converting a file entity to the (path, filename)"""
         # It's for old-format, pathname-only entries
         if isinstance(file, str):
@@ -382,7 +379,7 @@ class Nautilus(object):
         url = file.get("url", None)
         path = None
         filename = None
-        if archive_member is None and url is None:
+        if not archive_member and not url:
             raise ValueError("archive_member and url are both missing")
         if url:
             path = url
@@ -399,13 +396,15 @@ class Nautilus(object):
                 continue
 
             for file in entry["files"]:
-                file_entity = self.get_file_entry_from(file)
-                path = file_entity[0]
-                filename = file_entity[1]
+                path, filename = self.get_file_entry_from(file)
                 logger.debug(f"> {path}")
 
                 if path.startswith("http"):
-                    fpath = self.tempfiles_dir.joinpath(filename).resolve()
+                    fpath = pathlib.Path(
+                        tempfile.NamedTemporaryFile(
+                            dir=self.build_dir, delete=False
+                        ).name
+                    )
                     save_large_file(path, fpath)
                 else:
                     fpath = self.extract_to_fs(path)
