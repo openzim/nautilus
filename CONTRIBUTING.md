@@ -45,7 +45,7 @@ _Note_: when using raw source, you need to compile JS templates first (see bello
 In-JS templates uses [handlebars](https://handlebarsjs.com). When editing them, always recompile them all into precompiled.js:
 
 ```
-handlebars nautiluszim/templates -f nautiluszim/templates/assets/templates/precompiled.js
+handlebars nautiluszim/templates -f nautiluszim/templates/precompiled.js
 ```
 
 ## notes

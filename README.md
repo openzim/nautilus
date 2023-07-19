@@ -78,6 +78,15 @@ pip install nautiluszim
 nautiluszim --help
 ```
 
+## develop
+
+Nautilus relies on downloaded and pre-compiled assets. Make sure to install as editable to grab them.
+
+```sh
+pip install -e .
+nautiluszim --help
+```
+
 # Usage
 
 ```
