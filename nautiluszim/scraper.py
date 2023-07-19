@@ -12,8 +12,7 @@ import unicodedata
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Dict, Optional, Union
-from urllib.parse import urlparse
+from typing import Dict, Optional, Tuple, Union
 
 import jinja2
 from zimscraperlib.constants import (
@@ -98,6 +97,7 @@ class Nautilus(object):
         self.keep_build_dir = keep_build_dir
 
         self.build_dir = self.output_dir.joinpath("build")
+        self.tempfiles_dir = self.build_dir.joinpath("build")
 
         # set and record locale for translations
         locale_name = (
@@ -200,6 +200,7 @@ class Nautilus(object):
 
         # create build folder
         os.makedirs(self.build_dir, exist_ok=True)
+        os.makedirs(self.tempfiles_dir, exist_ok=True)
         for fname in ("favicon.png", "main-logo.png"):
             shutil.copy2(
                 self.templates_dir.joinpath(fname),
@@ -347,9 +348,12 @@ class Nautilus(object):
             if not entry.get("files"):
                 continue
             for file in entry["files"]:
-                path = self.parse_files(file)["path"]
-                if not path.startswith("http") and path not in all_names:
-                    missing_files.append(path)
+                try:
+                    path = self.get_file_entry_from(file)[0]
+                    if not path.startswith("http") and path not in all_names:
+                        missing_files.append(path)
+                except ValueError:
+                    missing_files.append(entry["title"])
 
         if missing_files:
             raise ValueError(
@@ -357,9 +361,13 @@ class Nautilus(object):
                 + "\n - ".join(missing_files)
             )
 
-    def parse_files(self, file: Union[str, Dict[str, str]]):
+    def get_file_entry_from(
+        self, file: Union[str, Dict[str, str]]
+    ) -> Tuple[str | None, str | None]:
+        """Converting a file entity to the (path, filename)"""
+        # It's for old-format, pathname-only entries
         if isinstance(file, str):
-            return {"path": file, "filename": file}
+            return (file, file)
         archive_member = file.get("archive-member", None)
         url = file.get("url", None)
         path = None
@@ -368,12 +376,12 @@ class Nautilus(object):
             raise ValueError("archive_member and url are both missing")
         if url:
             path = url
-            filename = os.path.basename(urlparse(url).path)
+            filename = Path(url).name
         else:
             path = archive_member
             filename = archive_member
         filename = file.get("filename", filename)
-        return {"path": path, "filename": filename}
+        return (path, filename)
 
     def process_collection_entries(self):
         for entry in self.json_collection:
@@ -381,15 +389,14 @@ class Nautilus(object):
                 continue
 
             for file in entry["files"]:
-                file_entity = self.parse_files(file)
-                path = file_entity["path"]
-                filename = file_entity["filename"]
+                file_entity = self.get_file_entry_from(file)
+                path = file_entity[0]
+                filename = file_entity[1]
                 logger.debug(f"> {path}")
 
                 if path.startswith("http"):
-                    save_location = self.output_dir.joinpath(filename).resolve()
-                    save_large_file(path, save_location)
-                    fpath = save_location
+                    fpath = self.tempfiles_dir.joinpath(filename).resolve()
+                    save_large_file(path, fpath)
                 else:
                     fpath = self.extract_to_fs(path)
 
@@ -474,7 +481,7 @@ class Nautilus(object):
                         "dsc": document.get("description") or "",
                         "aut": document.get("authors") or "",
                         "fp": [
-                            normalized_path(self.parse_files(file)["filename"])
+                            normalized_path(self.get_file_entry_from(file)[1])
                             for file in document.get("files", [])
                         ],
                     }
