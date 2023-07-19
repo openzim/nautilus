@@ -344,12 +344,14 @@ class Nautilus(object):
             all_names = zh.namelist()
 
         missing_files = []
+        saved_file_paths = []
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
             for file in entry["files"]:
                 try:
                     path = self.get_file_entry_from(file)[0]
+                    saved_file_paths.append(path)
                     if not path.startswith("http") and path not in all_names:
                         missing_files.append(path)
                 except ValueError:
@@ -359,6 +361,14 @@ class Nautilus(object):
             raise ValueError(
                 "File(s) referenced in collection but missing:\n - "
                 + "\n - ".join(missing_files)
+            )
+        duplicate_file_paths = [
+            path for path in saved_file_paths if saved_file_paths.count(path) > 1
+        ]
+        if duplicate_file_paths:
+            raise ValueError(
+                "Files in collection are duplicate:\n - "
+                + "\n - ".join(duplicate_file_paths)
             )
 
     def get_file_entry_from(
