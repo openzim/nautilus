@@ -339,6 +339,9 @@ class Nautilus(object):
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
+        self.test_files()
+
+    def test_files(self):
         with zipfile.ZipFile(self.archive_path, "r") as zh:
             all_names = zh.namelist()
 
@@ -356,16 +359,20 @@ class Nautilus(object):
                 except ValueError:
                     missing_files.append(entry["title"])
 
+        duplicate_file_names = set(
+            [
+                filename
+                for filename in all_file_names
+                if all_file_names.count(filename) > 1
+            ]
+        )
+
         if missing_files:
             raise ValueError(
                 "File(s) referenced in collection but missing:\n - "
                 + "\n - ".join(missing_files)
             )
-        duplicate_file_names = set([
-            filename
-            for filename in all_file_names
-            if all_file_names.count(filename) > 1
-        ])
+
         if duplicate_file_names:
             raise ValueError(
                 "Files in collection are duplicate:\n - "
