@@ -343,16 +343,16 @@ class Nautilus(object):
             all_names = zh.namelist()
 
         missing_files = []
-        all_file_paths = []
+        all_file_names = []
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
             for file in entry["files"]:
                 try:
-                    path, _ = self.get_file_entry_from(file)
-                    all_file_paths.append(path)
-                    if not path.startswith("http") and path not in all_names:
-                        missing_files.append(path)
+                    uri, filename = self.get_file_entry_from(file)
+                    all_file_names.append(filename)
+                    if not uri.startswith("http") and uri not in all_names:
+                        missing_files.append(uri)
                 except ValueError:
                     missing_files.append(entry["title"])
 
@@ -361,34 +361,36 @@ class Nautilus(object):
                 "File(s) referenced in collection but missing:\n - "
                 + "\n - ".join(missing_files)
             )
-        duplicate_file_paths = [
-            path for path in all_file_paths if all_file_paths.count(path) > 1
-        ]
-        if duplicate_file_paths:
+        duplicate_file_names = set([
+            filename
+            for filename in all_file_names
+            if all_file_names.count(filename) > 1
+        ])
+        if duplicate_file_names:
             raise ValueError(
                 "Files in collection are duplicate:\n - "
-                + "\n - ".join(duplicate_file_paths)
+                + "\n - ".join(duplicate_file_names)
             )
 
     def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> Tuple[str, str]:
-        """Converting a file entity to the (path, filename)"""
+        """Converting a file entity to the (uri, filename)"""
         # It's for old-format, pathname-only entries
         if isinstance(file, str):
             return (file, file)
         archive_member = file.get("archive-member", None)
         url = file.get("url", None)
-        path = None
+        uri = None
         filename = None
         if not archive_member and not url:
             raise ValueError("archive_member and url are both missing")
         if url:
-            path = url
+            uri = url
             filename = Path(url).name
         else:
-            path = archive_member
+            uri = archive_member
             filename = archive_member
         filename = file.get("filename", filename)
-        return (path, filename)
+        return (uri, filename)
 
     def process_collection_entries(self):
         for entry in self.json_collection:
@@ -396,18 +398,18 @@ class Nautilus(object):
                 continue
 
             for file in entry["files"]:
-                path, filename = self.get_file_entry_from(file)
-                logger.debug(f"> {path}")
+                uri, filename = self.get_file_entry_from(file)
+                logger.debug(f"> {uri}")
 
-                if path.startswith("http"):
+                if uri.startswith("http"):
                     fpath = pathlib.Path(
                         tempfile.NamedTemporaryFile(
                             dir=self.build_dir, delete=False
                         ).name
                     )
-                    save_large_file(path, fpath)
+                    save_large_file(uri, fpath)
                 else:
-                    fpath = self.extract_to_fs(path)
+                    fpath = self.extract_to_fs(uri)
 
                 self.zim_creator.add_item_for(
                     path="files/" + normalized_path(filename),
