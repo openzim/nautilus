@@ -8,11 +8,12 @@ import locale
 import os
 import pathlib
 import shutil
+import tempfile
 import unicodedata
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional, Tuple, Union
 
 import jinja2
 from zimscraperlib.constants import (
@@ -338,16 +339,33 @@ class Nautilus(object):
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
+        self.test_files()
+
+    def test_files(self):
         with zipfile.ZipFile(self.archive_path, "r") as zh:
             all_names = zh.namelist()
 
         missing_files = []
+        all_file_names = []
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
-            for relative_path in entry["files"]:
-                if relative_path not in all_names:
-                    missing_files.append(relative_path)
+            for file in entry["files"]:
+                try:
+                    uri, filename = self.get_file_entry_from(file)
+                    all_file_names.append(filename)
+                    if not uri.startswith("http") and uri not in all_names:
+                        missing_files.append(uri)
+                except ValueError:
+                    missing_files.append(entry["title"])
+
+        duplicate_file_names = set(
+            [
+                filename
+                for filename in all_file_names
+                if all_file_names.count(filename) > 1
+            ]
+        )
 
         if missing_files:
             raise ValueError(
@@ -355,16 +373,54 @@ class Nautilus(object):
                 + "\n - ".join(missing_files)
             )
 
+        if duplicate_file_names:
+            raise ValueError(
+                "Files in collection are duplicate:\n - "
+                + "\n - ".join(duplicate_file_names)
+            )
+
+    def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> Tuple[str, str]:
+        """Converting a file entity to the (uri, filename)"""
+        # It's for old-format, pathname-only entries
+        if isinstance(file, str):
+            return (file, file)
+        archive_member = file.get("archive-member", None)
+        url = file.get("url", None)
+        uri = None
+        filename = None
+        if not archive_member and not url:
+            raise ValueError("archive_member and url are both missing")
+        if url:
+            uri = url
+            filename = Path(url).name
+        else:
+            uri = archive_member
+            filename = archive_member
+        filename = file.get("filename", filename)
+        return (uri, filename)
+
     def process_collection_entries(self):
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
 
-            for relative_path in entry["files"]:
-                logger.debug(f"> {relative_path}")
+            for file in entry["files"]:
+                uri, filename = self.get_file_entry_from(file)
+                logger.debug(f"> {uri}")
+
+                if uri.startswith("http"):
+                    fpath = pathlib.Path(
+                        tempfile.NamedTemporaryFile(
+                            dir=self.build_dir, delete=False
+                        ).name
+                    )
+                    save_large_file(uri, fpath)
+                else:
+                    fpath = self.extract_to_fs(uri)
+
                 self.zim_creator.add_item_for(
-                    path="files/" + normalized_path(relative_path),
-                    fpath=self.extract_to_fs(relative_path),
+                    path="files/" + normalized_path(filename),
+                    fpath=fpath,
                     delete_fpath=True,
                     is_front=False,
                 )
@@ -443,7 +499,8 @@ class Nautilus(object):
                         "dsc": document.get("description") or "",
                         "aut": document.get("authors") or "",
                         "fp": [
-                            normalized_path(path) for path in document.get("files", [])
+                            normalized_path(self.get_file_entry_from(file)[1])
+                            for file in document.get("files", [])
                         ],
                     }
                 )
