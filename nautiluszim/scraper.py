@@ -360,7 +360,7 @@ class Nautilus(object):
         for uri in all_uris:
             if not uri.startswith("http"):
                 raise ValueError(
-                    f"File referenced in collection are not urls:\n - {uri}\n "
+                    f"File referenced in collection which are not urls:\n - {uri}\n "
                 )
 
         self._ensure_no_missing_files(missing_filenames)
