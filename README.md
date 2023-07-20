@@ -33,7 +33,7 @@ The user-interface only gives access to files referenced properly in the collect
 
 At the moment, the JSON file needs to provide the following fields for each item in an array:
 
-``` JSON
+```json
 [
     {
         "title": "...",
@@ -79,13 +79,13 @@ Either inside the archive ZIP as `/about.html` or elsewhere, specified via `--ab
 
 ## docker
 
-```
+```sh
 docker run -v my_dir:/output ghcr.io/openzim/nautilus nautiluszim --help
 ```
 
 ## pip
 
-```
+```sh
 pip install nautiluszim
 nautiluszim --help
 ```
@@ -101,8 +101,13 @@ nautiluszim --help
 
 # Usage
 
-```
+```sh
 nautiluszim --archive my-content.zip
+```
+Or
+```sh
+nautiluszim --collection https://example.com/to-your-collection-file
+# In this mode every file entry must have a valid url.
 ```
 
 ## Notes
