@@ -349,7 +349,7 @@ class Nautilus(object):
         self.load_collection()
 
         (
-            duplicate_filename,
+            duplicate_filenames,
             missing_filenames,
             all_uris,
         ) = self.test_files()
@@ -364,17 +364,17 @@ class Nautilus(object):
                 )
 
         self._ensure_no_missing_files(missing_filenames)
-        self._ensure_no_duplicate_filenames(duplicate_filename)
+        self._ensure_no_duplicate_filenames(duplicate_filenames)
 
     def test_archive_collection(self):
         """Test the collection.json with the archive file"""
         self.load_collection()
         with zipfile.ZipFile(self.archive_path, "r") as zh:
             all_names = zh.namelist()
-        duplicate_filename, missing_filenames, _ = self.test_files(all_names)
+        duplicate_filenames, missing_filenames, _ = self.test_files(all_names)
 
         self._ensure_no_missing_files(missing_filenames)
-        self._ensure_no_duplicate_filenames(duplicate_filename)
+        self._ensure_no_duplicate_filenames(duplicate_filenames)
 
     def _ensure_no_missing_files(self, files):
         if not files:
@@ -395,7 +395,7 @@ class Nautilus(object):
         self, available_filenames: Optional[List[str]] = None
     ) -> Tuple[List[str], List[str], List[str]]:
         """Tests the file entries and returns:
-        duplicate_filename: list of target (in ZIM) filenames that are present 2+ times
+        duplicate_filenames: list of target (in ZIM) filenames that are present 2+ times
         missing_filenames: list of entry titles for which a filename is missing
         all_uris: list of all target filenames
         """
@@ -419,10 +419,10 @@ class Nautilus(object):
                 except ValueError:
                     missing_filenames.append(entry["title"])
 
-        duplicate_filename = [
+        duplicate_filenames = [
             filename for filename in all_uris if all_uris.count(filename) > 1
         ]
-        return (duplicate_filename, missing_filenames, all_uris)
+        return (duplicate_filenames, missing_filenames, all_uris)
 
     def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> tuple:
         """Converting a file entity to the (uri, filename)"""
