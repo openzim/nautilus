@@ -13,7 +13,7 @@ import unicodedata
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import jinja2
 from zimscraperlib.constants import (
@@ -145,14 +145,18 @@ class Nautilus(object):
         self.check_branding_values()
 
         # download archive
-        self.download_archive()
+        if self.archive:
+            self.download_archive()
 
         if not self.collection:
             self.collection = self.extract_to_fs("collection.json")
             if not self.about:
                 self.extract_to_fs("about.html", failsafe=True)
 
-        self.test_collection()
+        if not self.archive:
+            self.test_archiveless_collection()
+        else:
+            self.test_archive_collection()
 
         logger.info("update general metadata")
         self.update_metadata()
@@ -332,54 +336,95 @@ class Nautilus(object):
                     return
                 raise exc
 
-    def test_collection(self):
+    def load_collection(self):
+        """Load the collection.json"""
         with open(self.collection, "r") as fp:
             self.json_collection = [i for i in json.load(fp) if i.get("files", [])]
         nb_items = len(self.json_collection)
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
 
-        self.test_files()
+    def test_archiveless_collection(self):
+        """Test the collection.json without archive file"""
+        self.load_collection()
 
-    def test_files(self):
+        (
+            duplicate_filenames,
+            missing_filenames,
+            all_uris,
+        ) = self.test_files()
+
+        if not all_uris:
+            raise ValueError("Collection is emtpy:\n")
+
+        for uri in all_uris:
+            if not uri.startswith("http"):
+                raise ValueError(
+                    f"File referenced in collection which are not urls:\n - {uri}\n "
+                )
+
+        self._ensure_no_missing_files(missing_filenames)
+        self._ensure_no_duplicate_filenames(duplicate_filenames)
+
+    def test_archive_collection(self):
+        """Test the collection.json with the archive file"""
+        self.load_collection()
         with zipfile.ZipFile(self.archive_path, "r") as zh:
             all_names = zh.namelist()
+        duplicate_filenames, missing_filenames, _ = self.test_files(all_names)
 
-        missing_files = []
-        all_file_names = []
+        self._ensure_no_missing_files(missing_filenames)
+        self._ensure_no_duplicate_filenames(duplicate_filenames)
+
+    def _ensure_no_missing_files(self, files):
+        if not files:
+            return
+        raise ValueError(
+            "File(s) referenced in collection which are missing:\n - "
+            + "\n - ".join(files)
+        )
+
+    def _ensure_no_duplicate_filenames(self, files):
+        if not files:
+            return
+        raise ValueError(
+            "Files in collection which are duplicate:\n - " + "\n - ".join(files)
+        )
+
+    def test_files(
+        self, available_filenames: Optional[List[str]] = None
+    ) -> Tuple[List[str], List[str], List[str]]:
+        """Tests the file entries and returns:
+        duplicate_filenames: list of target (in ZIM) filenames that are present 2+ times
+        missing_filenames: list of entry titles for which a filename is missing
+        all_uris: list of all target filenames
+        """
+
+        missing_filenames = []
+        all_uris = []
+
         for entry in self.json_collection:
             if not entry.get("files"):
                 continue
             for file in entry["files"]:
                 try:
-                    uri, filename = self.get_file_entry_from(file)
-                    all_file_names.append(filename)
-                    if not uri.startswith("http") and uri not in all_names:
-                        missing_files.append(uri)
+                    uri, _ = self.get_file_entry_from(file)
+                    all_uris.append(uri)
+                    if (
+                        not uri.startswith("http")
+                        and available_filenames
+                        and uri not in available_filenames
+                    ):
+                        missing_filenames.append(uri)
                 except ValueError:
-                    missing_files.append(entry["title"])
+                    missing_filenames.append(entry["title"])
 
-        duplicate_file_names = set(
-            [
-                filename
-                for filename in all_file_names
-                if all_file_names.count(filename) > 1
-            ]
-        )
+        duplicate_filenames = [
+            filename for filename in all_uris if all_uris.count(filename) > 1
+        ]
+        return (duplicate_filenames, missing_filenames, all_uris)
 
-        if missing_files:
-            raise ValueError(
-                "File(s) referenced in collection but missing:\n - "
-                + "\n - ".join(missing_files)
-            )
-
-        if duplicate_file_names:
-            raise ValueError(
-                "Files in collection are duplicate:\n - "
-                + "\n - ".join(duplicate_file_names)
-            )
-
-    def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> Tuple[str, str]:
+    def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> tuple:
         """Converting a file entity to the (uri, filename)"""
         # It's for old-format, pathname-only entries
         if isinstance(file, str):

@@ -16,7 +16,7 @@ def main():
     parser.add_argument(
         "--archive",
         help="Path or URL to a ZIP archive containing all the documents",
-        required=True,
+        required=False,
     )
     parser.add_argument(
         "--collection",
