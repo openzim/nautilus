@@ -13,7 +13,7 @@ import unicodedata
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import jinja2
 from zimscraperlib.constants import (
@@ -380,14 +380,15 @@ class Nautilus(object):
         if not files:
             return
         raise ValueError(
-            "File(s) referenced in collection but missing:\n - " + "\n - ".join(files)
+            "File(s) referenced in collection which are missing:\n - "
+            + "\n - ".join(files)
         )
 
     def _ensure_no_duplicate_filenames(self, files):
         if not files:
             return
         raise ValueError(
-            "Files in collection are duplicate:\n - " + "\n - ".join(files)
+            "Files in collection which are duplicate:\n - " + "\n - ".join(files)
         )
 
     def test_files(
@@ -423,7 +424,7 @@ class Nautilus(object):
         ]
         return (duplicate_filename, missing_filenames, all_uris)
 
-    def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> Tuple[str, str]:
+    def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> tuple:
         """Converting a file entity to the (uri, filename)"""
         # It's for old-format, pathname-only entries
         if isinstance(file, str):
