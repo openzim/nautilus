@@ -392,14 +392,13 @@ class Nautilus(object):
 
     def test_files(
         self, available_filenames: Optional[List[str]] = None
-    ) -> Tuple[Set[str], List[str], List[str]]:
+    ) -> Tuple[List[str], List[str], List[str]]:
         """Tests the file entries and returns:
         duplicate_filename: list of target (in ZIM) filenames that are present 2+ times
         missing_filenames: list of entry titles for which a filename is missing
         all_uris: list of all target filenames
         """
 
-        duplicate_filename = set()
         missing_filenames = []
         all_uris = []
 
@@ -419,9 +418,9 @@ class Nautilus(object):
                 except ValueError:
                     missing_filenames.append(entry["title"])
 
-        duplicate_filename = set(
-            [filename for filename in all_uris if all_uris.count(filename) > 1]
-        )
+        duplicate_filename = [
+            filename for filename in all_uris if all_uris.count(filename) > 1
+        ]
         return (duplicate_filename, missing_filenames, all_uris)
 
     def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> Tuple[str, str]:
