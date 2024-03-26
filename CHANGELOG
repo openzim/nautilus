@@ -13,6 +13,10 @@ as of 1.3.0.
 - Add urls support to collections. (#59)
 - Add archiveless collection.json support. (#60)
 
+### Fixed
+
+- Header link to home was leading to template (#68)
+
 ## [1.1.1] - 2023-05-05
 
 ### Changed
