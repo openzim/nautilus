@@ -563,6 +563,9 @@ class Nautilus(object):
             if not fpath.is_file():
                 continue
             path = str(fpath.relative_to(self.templates_dir))
+            # index is an actual template which shouldn't be in ZIM
+            if path == "index.html":
+                continue
 
             logger.debug(f"> {path}")
             self.zim_creator.add_item_for(path=path, fpath=fpath, is_front=False)
