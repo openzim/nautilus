@@ -1,12 +1,14 @@
-Nautilus
-=============
+
+# Nautilus
+
+`nautilus` turns a collection of documents into a browsable [ZIM file](https://openzim.org).
 
 [![CodeFactor](https://www.codefactor.io/repository/github/openzim/nautilus/badge)](https://www.codefactor.io/repository/github/openzim/nautilus)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![codecov](https://codecov.io/gh/openzim/nautilus/branch/main/graph/badge.svg)](https://codecov.io/gh/openzim/nautilus)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/nautiluszim.svg)](https://pypi.org/project/nautiluszim/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nautiluszim.svg)](https://pypi.org/project/nautiluszim)
 [![Docker](https://ghcr-badge.deta.dev/openzim/nautilus/latest_tag?label=docker)](https://ghcr.io/openzim/nautilus)
-
-`nautilus` turns a collection of documents into a browsable [ZIM file](https://openzim.org).
 
 It downloads the video (webm or mp4 format – optionally recompress it in lower-quality, smaller size), the thumbnails, the subtitles and the authors' profile pictures ; then, it creates a static HTML files folder of it before creating a ZIM off of it.
 
@@ -67,50 +69,34 @@ Either inside the archive ZIP as `/about.html` or elsewhere, specified via `--ab
 * Use inline styling if required, but no styling is recommended.
 * Include one logo inline if required.
 
-# Requirements
-
-* `wget` and `unzip` to install JS dependencies. See `get_js_deps.sh` if you want to do it manually.
-* `wget` is used to download archive files as well.
-* [`handlebars`](https://handlebarsjs.com) is used to compile JS templates
-
-# Installation
-
-`nautilus` is a python program. if you are not using the docker image, you are advised to use it in a virtual-environment. See `requirements.txt` for the list of python dependencies.
-
-## docker
+## Usage
 
 ```sh
-docker run -v my_dir:/output ghcr.io/openzim/nautilus nautiluszim --help
-```
+❯ nautuluszim --help
+usage: nautuluszim [-h] [-V]
 
-## pip
-
-```sh
-pip install nautiluszim
-nautiluszim --help
-```
-
-## develop
-
-Nautilus relies on downloaded and pre-compiled assets. Make sure to install as editable to grab them.
-
-```sh
-pip install -e .
-nautiluszim --help
-```
-
-# Usage
-
-```sh
+# everything bundled in a ZIP
 nautiluszim --archive my-content.zip
-```
-Or
-```sh
-nautiluszim --collection https://example.com/to-your-collection-file
+
 # In this mode every file entry must have a valid url.
+nautiluszim --collection https://example.com/to-your-collection-file
 ```
 
-## Notes
+### Installation
+
+You'd want to install it in a dedicated virtual-environment (`python3 -m venv some-env && source ./some-env/bin/activate`)
+
+```sh
+❯ pip install nautiluszim
+```
+
+### Contributing
+
+```sh
+❯ pip install -e .
+```
+
+#### Notes
 
 * On macOS, the locale setting is buggy. You need to launch it with the `LANGUAGE` environment variable (as ISO-639-1) for the translations to work.
 
@@ -118,6 +104,6 @@ nautiluszim --collection https://example.com/to-your-collection-file
 LANGUAGE=fr nautiluszim --language fra
 ```
 
-## Development
+Nautilus adheres to openZIM's [Contribution Guidelines](https://github.com/openzim/overview/wiki/Contributing).
 
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+Nautilus has implemented openZIM's [Python bootstrap, conventions and policies](https://github.com/openzim/_python-bootstrap/docs/Policy.md) **v1.0.0**.
