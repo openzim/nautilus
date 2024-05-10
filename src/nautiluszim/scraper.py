@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# vim: ai ts=4 sts=4 et sw=4 nu
-
 import datetime
 import json
 import locale
@@ -13,7 +9,6 @@ import unicodedata
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 import jinja2
 from zimscraperlib.constants import (
@@ -28,9 +23,9 @@ from zimscraperlib.image.transformation import resize_image
 from zimscraperlib.inputs import handle_user_provided_file
 from zimscraperlib.zim.creator import Creator
 
-from .constants import ROOT_DIR, SCRAPER, getLogger
+from nautiluszim.constants import ROOT_DIR, SCRAPER, get_logger
 
-logger = getLogger()
+logger = get_logger()
 
 
 def normalized_path(path: str) -> str:
@@ -38,7 +33,7 @@ def normalized_path(path: str) -> str:
     return unicodedata.normalize("NFKC", path)
 
 
-class Nautilus(object):
+class Nautilus:
     def __init__(
         self,
         archive,
@@ -109,7 +104,7 @@ class Nautilus(object):
         except locale.Error:
             logger.error(
                 f"No locale for {locale_name}. Use --locale to specify it. "
-                "defaulting to en_US"
+                + "defaulting to en_US"
             )
             self.locale = setlocale(ROOT_DIR, "en")
 
@@ -136,7 +131,7 @@ class Nautilus(object):
 
         logger.info(f"starting nautilus scraper for {self.archive}")
 
-        logger.info("preparing build folder at {}".format(self.build_dir.resolve()))
+        logger.info(f"preparing build folder at {self.build_dir.resolve()}")
         if not self.keep_build_dir and self.build_dir.exists():
             shutil.rmtree(self.build_dir)
         self.make_build_folder()
@@ -177,7 +172,7 @@ class Nautilus(object):
                 LongDescription=self.long_description,
                 Creator=self.creator,
                 Publisher=self.publisher,
-                Date=datetime.date.today(),
+                Date=datetime.datetime.now().date(),
                 Illustration_48x48_at_1=fh.read(),
                 Tags=";".join(self.tags),
                 Scraper=SCRAPER,
@@ -258,7 +253,7 @@ class Nautilus(object):
         if self.secondary_color and not is_hex_color(self.secondary_color):
             raise ValueError(
                 "--secondary_color-color is not a valid hex color: "
-                f"{self.secondary_color}"
+                + f"{self.secondary_color}"
             )
 
         if self.about:
@@ -267,18 +262,21 @@ class Nautilus(object):
             )
 
     def check_description_length(self):
-        if len(self.description) > MAXIMUM_DESCRIPTION_METADATA_LENGTH:
+        if (
+            self.description
+            and len(self.description) > MAXIMUM_DESCRIPTION_METADATA_LENGTH
+        ):
             raise ValueError(
                 "--The description is greater "
-                f"than {MAXIMUM_DESCRIPTION_METADATA_LENGTH} characters: "
-                f"{len(self.description)} characters"
+                + f"than {MAXIMUM_DESCRIPTION_METADATA_LENGTH} characters: "
+                + f"{len(self.description)} characters"
             )
         if self.long_description is not None:
             if len(self.long_description) > MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH:
                 raise ValueError(
                     "--The Long Description is greater "
-                    f"than {MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH} characters: "
-                    f"{len(self.long_description)} characters"
+                    + f"than {MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH} characters: "
+                    + f"{len(self.long_description)} characters"
                 )
 
     def update_metadata(self):
@@ -311,7 +309,7 @@ class Nautilus(object):
         self.about_content = f"<p>{self.long_description or self.description}</p>"
         about_source = self.build_dir / "about.html"
         if about_source.exists():
-            with open(about_source, "r") as fh:
+            with open(about_source) as fh:
                 self.about_content = fh.read()
             about_source.unlink(missing_ok=True)
 
@@ -322,8 +320,8 @@ class Nautilus(object):
             save_large_file(self.archive, self.archive_path)
 
     def extract_to_fs(
-        self, name: str, failsafe: Optional[bool] = False
-    ) -> pathlib.Path:
+        self, name: str, *, failsafe: bool | None = False
+    ) -> pathlib.Path | None:
         """extracting single archive member `name` to filesystem at `to`"""
 
         with zipfile.ZipFile(self.archive_path, "r") as zh:
@@ -338,7 +336,9 @@ class Nautilus(object):
 
     def load_collection(self):
         """Load the collection.json"""
-        with open(self.collection, "r") as fp:
+        if not self.collection:
+            return
+        with open(self.collection) as fp:
             self.json_collection = [i for i in json.load(fp) if i.get("files", [])]
         nb_items = len(self.json_collection)
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
@@ -392,8 +392,8 @@ class Nautilus(object):
         )
 
     def test_files(
-        self, available_filenames: Optional[List[str]] = None
-    ) -> Tuple[List[str], List[str], List[str]]:
+        self, available_filenames: list[str] | None = None
+    ) -> tuple[list[str], list[str], list[str]]:
         """Tests the file entries and returns:
         duplicate_filenames: list of target (in ZIM) filenames that are present 2+ times
         missing_filenames: list of entry titles for which a filename is missing
@@ -424,7 +424,7 @@ class Nautilus(object):
         ]
         return (duplicate_filenames, missing_filenames, all_uris)
 
-    def get_file_entry_from(self, file: Union[str, Dict[str, str]]) -> tuple:
+    def get_file_entry_from(self, file: str | dict[str, str]) -> tuple:
         """Converting a file entity to the (uri, filename)"""
         # It's for old-format, pathname-only entries
         if isinstance(file, str):
