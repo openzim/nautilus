@@ -1,0 +1,91 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        python: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: x64
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: install handlebars
+        run: |
+          npm install -g handlebars
+
+      - name: Install dependencies (and project)
+        run: |
+          pip install -U pip
+          pip install -e .[test,scripts]
+
+      - name: Run the tests
+        run: inv coverage --args "-vvv"
+
+      - name: Upload coverage report to codecov
+        if: matrix.python == '3.12'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  build_python:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: pyproject.toml
+          architecture: x64
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: install handlebars
+        run: |
+          npm install -g handlebars
+
+      - name: Ensure we can build Python targets
+        run: |
+          pip install -U pip build
+          python3 -m build --sdist --wheel
+
+  build_docker:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Ensure we can build the Docker image
+        run: |
+          docker build -t testimage .
+
+      - name: Ensure we can start the Docker image
+        run: |
+          docker run --rm testimage
+
+      # OR if image is a daemon process
+      # - name: Ensure we can start the Docker image
+      #   run: |
+      #     docker run --rm testimage
+      #     sleep 5
+      #     docker ps | grep test_container
+      #     docker stop test_container

@@ -1,16 +1,32 @@
-FROM python:3.8
+FROM python:3.11-slim-bookworm
+LABEL org.opencontainers.image.source https://github.com/openzim/nautilus
 
 # Install necessary packages
-RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends locales-all unzip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-RUN wget -nv -L https://nodejs.org/dist/v12.16.3/node-v12.16.3-linux-x64.tar.xz && \
-    tar -C /usr/local --strip-components 1 -xf node-v12.16.3-linux-x64.tar.xz && \
-    rm node-v12.16.3-linux-x64.tar.xz && npm install -g handlebars
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      # locales required if tool has any i18n support
+      locales-all wget \
+ && rm -rf /var/lib/apt/lists/* \
+ && python -m pip install --no-cache-dir -U \
+      pip \
+&& wget -nv -L https://nodejs.org/dist/v12.16.3/node-v12.16.3-linux-x64.tar.gz \
+&& tar -C /usr/local --strip-components 1 -xf node-v12.16.3-linux-x64.tar.gz \
+&& rm node-v12.16.3-linux-x64.tar.gz \
+&& npm install -g handlebars
 
-COPY nautiluszim /src/nautiluszim
-COPY get_js_deps.sh requirements.txt setup.py README.md LICENSE MANIFEST.in /src/
-RUN pip3 install --no-cache-dir -r /src/requirements.txt && cd /src/ && python3 ./setup.py install
+# Copy pyproject.toml and its dependencies
+COPY pyproject.toml README.md /src/
+COPY src/nautiluszim/__about__.py /src/src/nautiluszim/__about__.py
+
+# Install Python dependencies
+RUN pip install --no-cache-dir /src
+
+# Copy code + associated artifacts
+COPY src /src/src
+COPY *.md /src/
+
+# Install + cleanup
+RUN pip install --no-cache-dir /src \
+ && rm -rf /src
 
 CMD ["nautiluszim", "--help"]

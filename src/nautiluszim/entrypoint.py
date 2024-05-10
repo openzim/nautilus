@@ -1,10 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# vim: ai ts=4 sts=4 et sw=4 nu
-
 import argparse
 
-from .constants import NAME, SCRAPER, getLogger, setDebug
+from nautiluszim.constants import NAME, SCRAPER, get_logger, set_debug
 
 
 def main():
@@ -21,7 +17,7 @@ def main():
     parser.add_argument(
         "--collection",
         help="Different collection JSON path or URL. "
-        "Otherwise using `collection.json` from archive",
+        + "Otherwise using `collection.json` from archive",
         required=False,
     )
     parser.add_argument(
@@ -81,13 +77,13 @@ def main():
     parser.add_argument(
         "--language",
         help="ISO-639-3 (3 chars) language code of content. "
-        "comma-separated if multiple ones",
+        + "comma-separated if multiple ones",
         default="eng",
     )
     parser.add_argument(
         "--locale",
         help="Locale name to use for translations (if avail) and time representations. "
-        "Defaults to (first) --language or English.",
+        + "Defaults to (first) --language or English.",
         dest="locale_name",
     )
     parser.add_argument(
@@ -119,7 +115,7 @@ def main():
     parser.add_argument(
         "--favicon",
         help="Custom favicon. Will be resized to 48x48px. Nautilus one otherwise. "
-        "Also used as ZIM illustration",
+        + "Also used as ZIM illustration",
     )
     parser.add_argument(
         "--main-logo",
@@ -134,18 +130,18 @@ def main():
     parser.add_argument(
         "--main-color",
         help="Custom header color. Hex/HTML syntax (#DEDEDE). "
-        "Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
+        + "Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
     )
     parser.add_argument(
         "--secondary-color",
         help="Custom secondary color. Hex/HTML syntax (#DEDEDE). "
-        "Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
+        + "Default to main-logo's primary color solarized (or #95A5A6 if no logo).",
     )
 
     parser.add_argument(
         "--about",
         help="Custom about HTML file. "
-        "Uses file `about.html` of archive if present otherwise.",
+        + "Uses file `about.html` of archive if present otherwise.",
     )
 
     parser.add_argument(
@@ -157,9 +153,9 @@ def main():
 
     args = parser.parse_args()
 
-    setDebug(args.debug)
-    logger = getLogger()
-    from .scraper import Nautilus
+    set_debug(args.debug)
+    logger = get_logger()
+    from nautiluszim.scraper import Nautilus
 
     try:
         scraper = Nautilus(**dict(args._get_kwargs()))
@@ -168,7 +164,7 @@ def main():
         logger.error(f"FAILED. An error occured: {exc}")
         if args.debug:
             logger.exception(exc)
-        raise SystemExit(1)
+        raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":
