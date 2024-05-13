@@ -320,6 +320,7 @@ class Nautilus:
     def load_collection(self):
         """Load the collection.json"""
         if not self.collection:
+            self.json_collection = []
             return
         with open(self.collection) as fp:
             self.json_collection = [i for i in json.load(fp) if i.get("files", [])]
@@ -452,7 +453,7 @@ class Nautilus:
         uri = None
         filename = None
         if not archive_member and not url:
-            raise ValueError("archive_member and url are both missing")
+            raise ValueError("archive-member and url are both missing")
         if url:
             uri = url
             filename = Path(url).name

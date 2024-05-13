@@ -152,6 +152,7 @@ var Nautilus = (function() {
 
   Nautilus.prototype.init_videojs = function () {
     videojs.options.controls = true;
+    videojs.options.playsinline = true;
     videojs.options.crossorigin = true;
     videojs.options.preload = "auto";
     videojs.options.techOrder = ["html5", "ogvjs"];
@@ -159,7 +160,8 @@ var Nautilus = (function() {
     videojs.options.controlBar = {pictureInPictureToggle: false};
     // for some reason, global controls options is not working
     window.videojs_options = {controls: true,
-                              preload: 'auto', 
+                              preload: 'auto',
+                              playsinline: true,
                               crossorigin: true,
                               controlBar: {pictureInPictureToggle: false}};
   };
