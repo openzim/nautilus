@@ -15,7 +15,7 @@ from zimscraperlib.constants import (
     MAXIMUM_DESCRIPTION_METADATA_LENGTH,
     MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH,
 )
-from zimscraperlib.download import save_large_file
+from zimscraperlib.download import requests, save_large_file
 from zimscraperlib.i18n import _, get_language_details, setlocale
 from zimscraperlib.image.convertion import create_favicon
 from zimscraperlib.image.probing import get_colors, is_hex_color
@@ -138,6 +138,9 @@ class Nautilus:
 
         # fail early if supplied branding files are missing
         self.check_branding_values()
+
+        # fail early if remote entries URLs are not OK
+        self.test_all_urls()
 
         # download archive
         if self.archive:
@@ -343,6 +346,41 @@ class Nautilus:
         nb_items = len(self.json_collection)
         nb_files = sum([len(i.get("files", [])) for i in self.json_collection])
         logger.info(f"Collection loaded. {nb_items} items, {nb_files} files")
+
+    def test_all_urls(self):
+        """Check that all URL entries in collection respond successfully"""
+        self.load_collection()
+        failed = False
+
+        for entry in self.json_collection:
+            if not entry.get("files"):
+                continue
+            for file in entry["files"]:
+                if not isinstance(file, dict) or not file.get("url"):
+                    continue
+                url = file["url"]
+
+                if not url.startswith("http"):
+                    logger.error(f"- Not a valid HTTP URL: {url}")
+                    failed = True
+                    continue
+
+                try:
+                    resp = requests.get(url, stream=True)
+                except Exception as exc:
+                    logger.error(f"- Connection Error: {url} ({exc})")
+                    failed = True
+                    continue
+
+                try:
+                    resp.raise_for_status()
+                except Exception as exc:
+                    logger.error(f"- HTTP {resp.status_code}: {url} ({exc})")
+                    failed = True
+                    continue
+
+        if failed:
+            raise ValueError("Remote entries failed access test")
 
     def test_archiveless_collection(self):
         """Test the collection.json without archive file"""
