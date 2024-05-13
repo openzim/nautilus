@@ -382,7 +382,7 @@ class Nautilus:
                     f"File referenced in collection which are not urls:\n - {uri}\n "
                 )
 
-        self._ensure_no_missing_files(missing_filenames)
+        self._ensure_no_missing_files(missing_filenames, [])
         self._ensure_no_duplicate_filenames(duplicate_filenames)
 
     def test_archive_collection(self):
@@ -392,15 +392,25 @@ class Nautilus:
             all_names = zh.namelist()
         duplicate_filenames, missing_filenames, _ = self.test_files(all_names)
 
-        self._ensure_no_missing_files(missing_filenames)
+        self._ensure_no_missing_files(missing_filenames, all_names)
         self._ensure_no_duplicate_filenames(duplicate_filenames)
 
-    def _ensure_no_missing_files(self, files):
+    def _ensure_no_missing_files(self, files, member_names):
         if not files:
             return
+        extra = ""
+        if member_names:
+            extra = (
+                "\n FYI, here is the list of all members in archive:\n -"
+                + "\n - ".join(
+                    [f"{member} -- {json.dumps(member)}" for member in member_names]
+                )
+            )
+
         raise ValueError(
             "File(s) referenced in collection which are missing:\n - "
             + "\n - ".join(files)
+            + extra
         )
 
     def _ensure_no_duplicate_filenames(self, files):
