@@ -17,6 +17,7 @@ as of 1.3.0.
 
 - URL entries are checked early to exit should access fails (#29)
 - Simplified [long]description checks using compute_descriptions
+- Using PouchDB 8.0.1 (#45)
 
 ### Fixed
 

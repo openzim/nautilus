@@ -38,12 +38,12 @@ target_paths=["bootstrap"]
 
 [files.assets.actions."pouchdb.min.js"]
 action="get_file"
-source="https://cdn.jsdelivr.net/npm/pouchdb@7.1.1/dist/pouchdb.min.js"
+source="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"
 target_file="pouchdb.min.js"
 
 [files.assets.actions."pouchdb.find.min.js"]
 action="get_file"
-source="https://cdn.jsdelivr.net/npm/pouchdb@7.1.1/dist/pouchdb.find.min.js"
+source="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.find.min.js"
 target_file="pouchdb.find.min.js"
 
 [files.assets.actions."ScrollMagic.min.js"]
