@@ -11,16 +11,12 @@ import zipfile
 from pathlib import Path
 
 import jinja2
-from zimscraperlib.constants import (
-    MAXIMUM_DESCRIPTION_METADATA_LENGTH,
-    MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH,
-)
 from zimscraperlib.download import requests, save_large_file
 from zimscraperlib.i18n import _, get_language_details, setlocale
 from zimscraperlib.image.convertion import create_favicon
 from zimscraperlib.image.probing import get_colors, is_hex_color
 from zimscraperlib.image.transformation import resize_image
-from zimscraperlib.inputs import handle_user_provided_file
+from zimscraperlib.inputs import compute_descriptions, handle_user_provided_file
 from zimscraperlib.zim.creator import Creator
 
 from nautiluszim.constants import ROOT_DIR, SCRAPER, get_logger
@@ -127,7 +123,9 @@ class Nautilus:
     def run(self):
         """execute the scrapper step by step"""
 
-        self.check_description_length()
+        self.description, self.long_description = compute_descriptions(
+            self.description or "", self.description, self.long_description
+        )
 
         logger.info(f"starting nautilus scraper for {self.archive}")
 
@@ -263,24 +261,6 @@ class Nautilus:
             handle_user_provided_file(
                 source=self.about, dest=self.build_dir / "about.html"
             )
-
-    def check_description_length(self):
-        if (
-            self.description
-            and len(self.description) > MAXIMUM_DESCRIPTION_METADATA_LENGTH
-        ):
-            raise ValueError(
-                "--The description is greater "
-                + f"than {MAXIMUM_DESCRIPTION_METADATA_LENGTH} characters: "
-                + f"{len(self.description)} characters"
-            )
-        if self.long_description is not None:
-            if len(self.long_description) > MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH:
-                raise ValueError(
-                    "--The Long Description is greater "
-                    + f"than {MAXIMUM_LONG_DESCRIPTION_METADATA_LENGTH} characters: "
-                    + f"{len(self.long_description)} characters"
-                )
 
     def update_metadata(self):
         self.fname = Path(

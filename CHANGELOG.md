@@ -16,6 +16,7 @@ as of 1.3.0.
 ### Changed
 
 - URL entries are checked early to exit should access fails (#29)
+- Simplified [long]description checks using compute_descriptions
 
 ### Fixed
 
