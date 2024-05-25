@@ -6,6 +6,7 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       # locales required if tool has any i18n support
       locales-all wget \
+      libmagic1 \
  && rm -rf /var/lib/apt/lists/* \
  && python -m pip install --no-cache-dir -U \
       pip \
