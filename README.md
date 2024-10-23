@@ -73,7 +73,7 @@ Either inside the archive ZIP as `/about.html` or elsewhere, specified via `--ab
 
 ```sh
 ❯ nautuluszim --help
-usage: nautuluszim [-h] [-V]
+usage: nautiluszim [-h] [-V]
 
 # everything bundled in a ZIP
 nautiluszim --archive my-content.zip
