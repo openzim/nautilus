@@ -8,7 +8,7 @@
 [![codecov](https://codecov.io/gh/openzim/nautilus/branch/main/graph/badge.svg)](https://codecov.io/gh/openzim/nautilus)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/nautiluszim.svg)](https://pypi.org/project/nautiluszim/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nautiluszim.svg)](https://pypi.org/project/nautiluszim)
-[![Docker](https://ghcr-badge.deta.dev/openzim/nautilus/latest_tag?label=docker)](https://ghcr.io/openzim/nautilus)
+[![Docker](https://ghcr-badge.egpl.dev/openzim/nautilus/latest_tag?label=docker)](https://ghcr.io/openzim/nautilus)
 
 It downloads the video (webm or mp4 format – optionally recompress it in lower-quality, smaller size), the thumbnails, the subtitles and the authors' profile pictures ; then, it creates a static HTML files folder of it before creating a ZIM off of it.
 
