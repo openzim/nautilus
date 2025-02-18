@@ -5,6 +5,7 @@ import os
 import pathlib
 import shutil
 import tempfile
+import time
 import unicodedata
 import uuid
 import zipfile
@@ -56,6 +57,7 @@ class Nautilus:
         main_color=None,
         secondary_color=None,
         about=None,
+        download_delay=None,
     ):
         # options & zim params
         self.archive = archive
@@ -79,6 +81,7 @@ class Nautilus:
         self.secondary_color = secondary_color
         self.about = about
         self.randomize = not no_random
+        self.download_delay = download_delay
 
         # process-related
         self.output_dir = Path(output_dir).expanduser().resolve()
@@ -474,7 +477,7 @@ class Nautilus:
         return (uri, filename)
 
     def process_collection_entries(self):
-        for entry in self.json_collection:
+        for index, entry in enumerate(self.json_collection):
             if not entry.get("files"):
                 continue
 
@@ -483,6 +486,9 @@ class Nautilus:
                 logger.debug(f"> {uri}")
 
                 if uri.startswith("http"):
+                    if self.download_delay and index > 0:
+                        logger.debug(f"Sleeping {self.download_delay} seconds")
+                        time.sleep(self.download_delay)
                     fpath = pathlib.Path(
                         tempfile.NamedTemporaryFile(
                             dir=self.build_dir, delete=False

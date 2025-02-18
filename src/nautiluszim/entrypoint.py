@@ -145,6 +145,15 @@ def main():
     )
 
     parser.add_argument(
+        "--download-delay",
+        help="Delay between consecutive file downloads over the network, in seconds"
+        + " (local files are not affected)",
+        type=int,
+        required=False,
+        dest="download_delay",
+    )
+
+    parser.add_argument(
         "--version",
         help="Display scraper version and exit",
         action="version",
