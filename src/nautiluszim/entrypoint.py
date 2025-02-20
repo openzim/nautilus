@@ -94,6 +94,7 @@ def main():
     parser.add_argument(
         "--title",
         help="Title for your project and ZIM. Otherwise --name.",
+        required=True,
     )
     parser.add_argument(
         "--description",
@@ -105,12 +106,9 @@ def main():
         help="Long Description for your project and ZIM.",
     )
 
+    parser.add_argument("--creator", help="Name of content creator.", default="openZIM")
     parser.add_argument(
-        "--creator",
-        help="Name of content creator.",
-    )
-    parser.add_argument(
-        "--publisher", help="Custom publisher name (ZIM metadata)", default="Kiwix"
+        "--publisher", help="Custom publisher name (ZIM metadata)", default="openZIM"
     )
     parser.add_argument(
         "--favicon",
@@ -142,6 +140,15 @@ def main():
         "--about",
         help="Custom about HTML file. "
         + "Uses file `about.html` of archive if present otherwise.",
+    )
+
+    parser.add_argument(
+        "--download-delay",
+        help="Delay between consecutive file downloads over the network, in seconds"
+        + " (local files are not affected)",
+        type=int,
+        required=False,
+        dest="download_delay",
     )
 
     parser.add_argument(
