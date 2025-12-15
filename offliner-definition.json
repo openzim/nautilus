@@ -107,20 +107,23 @@
       "description": "List of comma-separated Tags for the ZIM file."
     },
     "main_logo": {
-      "type": "url",
+      "type": "blob",
+      "kind": "image",
       "required": false,
       "title": "Header Logo",
       "description": "Custom logo. Will be resized to 300x65px. Nautilus otherwise."
     },
     "secondary_logo": {
-      "type": "url",
+      "type": "blob",
+      "kind": "image",
       "required": false,
       "title": "Footer logo",
       "description": "Custom footer logo. Will be resized to 300x65px. None otherwise"
     },
     "favicon": {
-      "type": "url",
+      "type": "blob",
       "required": false,
+      "kind": "image",
       "title": "Favicon",
       "description": "Custom favicon. Will be resized to 48x48px. Nautilus otherwise."
     },
