@@ -140,7 +140,8 @@
       "description": "Custom footer color. Hex/HTML syntax (#DEDEDE). Default to main-logo's primary color solarized (or #95A5A6 if no logo)."
     },
     "about": {
-      "type": "url",
+      "type": "blob",
+      "kind": "html",
       "required": false,
       "title": "About page",
       "description": "Custom about HTML page."
