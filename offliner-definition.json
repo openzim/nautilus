@@ -128,13 +128,13 @@
       "description": "Custom favicon. Will be resized to 48x48px. Nautilus otherwise."
     },
     "main_color": {
-      "type": "string",
+      "type": "color",
       "required": false,
       "title": "Main Color",
       "description": "Custom header color. Hex/HTML syntax (#DEDEDE). Default to main-logo's primary color solarized (or #95A5A6 if no logo)."
     },
     "secondary_color": {
-      "type": "string",
+      "type": "color",
       "required": false,
       "title": "Secondary Color",
       "description": "Custom footer color. Hex/HTML syntax (#DEDEDE). Default to main-logo's primary color solarized (or #95A5A6 if no logo)."
