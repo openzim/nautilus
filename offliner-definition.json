@@ -76,16 +76,16 @@
       "required": false,
       "title": "Title",
       "description": "Title for your project and ZIM. Otherwise --name.",
-      "minLength": 1,
-      "maxLength": 30
+      "minGraphemes": 1,
+      "maxGraphemes": 30
     },
     "description": {
       "type": "string",
       "required": false,
       "title": "Description",
       "description": "Description for your project and ZIM.",
-      "minLength": 1,
-      "maxLength": 80
+      "minGraphemes": 1,
+      "maxGraphemes": 80
     },
     "creator": {
       "type": "string",
