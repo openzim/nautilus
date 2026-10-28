@@ -12,6 +12,7 @@ import zipfile
 from pathlib import Path
 
 import jinja2
+from zimscraperlib.constants import DEFAULT_USER_AGENT
 from zimscraperlib.download import requests, save_large_file
 from zimscraperlib.i18n import _, get_language_details, setlocale
 from zimscraperlib.image.convertion import create_favicon
@@ -303,7 +304,9 @@ class Nautilus:
         # download if it's a URL
         if self.archive.startswith("http"):
             logger.info(f"Downloading archive at {self.archive}")
-            save_large_file(self.archive, self.archive_path)
+            save_large_file(
+                self.archive, self.archive_path, user_agent=DEFAULT_USER_AGENT
+            )
 
     def extract_to_fs(
         self, name: str, *, failsafe: bool | None = False
@@ -350,7 +353,9 @@ class Nautilus:
                     continue
 
                 try:
-                    resp = requests.get(url, stream=True)
+                    resp = requests.get(
+                        url, stream=True, headers={"User-Agent": DEFAULT_USER_AGENT}
+                    )
                 except Exception as exc:
                     logger.error(f"- Connection Error: {url} ({exc})")
                     failed = True
@@ -494,7 +499,7 @@ class Nautilus:
                             dir=self.build_dir, delete=False
                         ).name
                     )
-                    save_large_file(uri, fpath)
+                    save_large_file(uri, fpath, user_agent=DEFAULT_USER_AGENT)
                 else:
                     fpath = self.extract_to_fs(uri)
 

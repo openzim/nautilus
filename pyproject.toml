@@ -9,7 +9,7 @@ description = "turns a collection of documents into a browsable ZIM file"
 readme = "README.md"
 dependencies = [
     "jinja2==3.1.4",
-    "zimscraperlib==3.3.2",
+    "zimscraperlib @ git+https://github.com/openzim/python-scraperlib@main",
 ]
 dynamic = ["authors", "classifiers", "keywords", "license", "version", "urls"]
 
@@ -44,13 +44,13 @@ nautiluszim = "nautiluszim.entrypoint:main"
 path = "src/nautiluszim/__about__.py"
 
 [tool.hatch.metadata]
-allow-direct-references = true
+allow-direct-references = true  # to be removed once we use a released zimscraperlib version
 
 [tool.hatch.metadata.hooks.openzim-metadata]
 kind = "scraper"
 
 [tool.hatch.build.hooks.openzim-build]
-dependencies = [ "zimscraperlib==3.3.2"] # required for fix_ogv_dist
+dependencies = [ "zimscraperlib @ git+https://github.com/openzim/python-scraperlib@main"] # required for fix_ogv_dist
 
 [tool.hatch.build]
 exclude = [

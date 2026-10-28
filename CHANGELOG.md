@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `--download-delay` option which uses time module to take specified breaks between consecutive downloads (#102)
 
+### Fixed
+
+- Send scraperlib's default `User-Agent` in all HTTP requests (collection URLs check, archive and collection files downloads, user-provided files), as `python-requests` default is rejected by some hosts, e.g. upload.wikimedia.org (#101)
+
+### Changed
+
+- Temporarily depend on zimscraperlib `main` branch, to be switched back to a released version once zimscraperlib with `save_large_file` `user_agent` support is released (#101)
+
 ## [1.2.1]
 
 ### Fixed
